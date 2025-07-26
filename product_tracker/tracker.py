@@ -109,37 +109,37 @@ import telegram
 
 def track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates):
     # Scrape the main product page
-    price, title, coupon = scrape_price_and_coupon(product_url)
+    price, title = scrape_price(product_url)
     best_price = price
     best_url = product_url
-    best_coupon = coupon
+    
     
     # Optionally check alternate sites
     if check_alternates and CHECK_ALTERNATE_SITES:
         for site in ALTERNATE_SITES:
             alt_url = find_alternate_url(site, title)
             if alt_url:
-                alt_price, _, alt_coupon = scrape_price_and_coupon(alt_url)
+                alt_price, _ = scrape_price(alt_url)
                 if alt_price and alt_price < best_price:
                     best_price = alt_price
                     best_url = alt_url
-                    best_coupon = alt_coupon
+                    
     
     # If price is at or below target, notify
     if best_price and best_price <= target_price:
-        message = f"Price Alert! {title}\nPrice: {best_price}\nTarget Price: {target_price}\nURL: {best_url}\nCoupons: {best_coupon or 'None'}"
+        message = f"Price Alert! {title}\nPrice: {best_price}\nTarget Price: {target_price}\nURL: {best_url}"
         if notify_method == 'telegram':
             send_telegram_message(message, phone_or_chat)
         return f"Notification sent! Best price: {best_price}"
     return f"No deal found. Current best price: {best_price}"
 
-def scrape_price_and_coupon(url):
+def scrape_price(url):
     headers = {'User-Agent': 'Mozilla/5.0'}
     resp = requests.get(url, headers=headers)
     soup = BeautifulSoup(resp.text, 'html.parser')
     title = soup.title.string if soup.title else 'Product'
     price = None
-    coupons = set()
+    
     import re
 
     # Myntra-specific price extraction
@@ -154,33 +154,8 @@ def scrape_price_and_coupon(url):
             if match:
                 price = float(match.group(1).replace(',', ''))
 
-    # Myntra coupon extraction
-    for span in soup.find_all('span', class_='pdp-offers-boldText'):
-        code = span.get_text(strip=True)
-        if code and code.upper() not in {'FREE', 'OFFER', 'SHOP', 'SAVE', 'CODE', 'BANK', 'CARD', 'DEBIT', 'CREDIT'}:
-            coupons.add(code.upper())
-
-    # Fallback: Find coupon codes only if they are directly mentioned after coupon-related phrases
-    for string in soup.stripped_strings:
-        if re.search(r'bank|card|credit|debit', string, re.IGNORECASE):
-            continue
-        match = re.findall(r'(?:use code|coupon code|apply code|apply|use coupon|coupon)\s*:?[\s\-]*([A-Z0-9]{4,})', string, re.IGNORECASE)
-        for code in match:
-            code = code.upper()
-            if code not in {'FREE', 'OFFER', 'SHOP', 'SAVE', 'CODE', 'BANK', 'CARD', 'DEBIT', 'CREDIT'}:
-                coupons.add(code)
-
-    # Fallback: Also look for coupon codes in elements with class or id containing 'coupon' or 'offer'
-    for tag in soup.find_all(lambda tag: (tag.has_attr('class') and any('coupon' in c.lower() or 'offer' in c.lower() for c in tag['class'])) or (tag.has_attr('id') and ('coupon' in tag['id'].lower() or 'offer' in tag['id'].lower()))):
-        text = tag.get_text(separator=' ', strip=True)
-        if re.search(r'bank|card|credit|debit', text, re.IGNORECASE):
-            continue
-        for code in re.findall(r'\b[A-Z0-9]{4,}\b', text):
-            if code not in {'FREE', 'OFFER', 'SHOP', 'SAVE', 'CODE', 'BANK', 'CARD', 'DEBIT', 'CREDIT'}:
-                coupons.add(code)
-
-    coupon = ', '.join(sorted(coupons)) if coupons else None
-    return price, title, coupon
+   
+    return price, title
 
 def find_alternate_url(site, product_title):
     # Placeholder: In real use, search the site for the product

@@ -6,7 +6,7 @@ app.secret_key = 'your_secret_key'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    coupons = None
+    
     target_price = None
     product_url = None
     if request.method == 'POST':
@@ -18,11 +18,11 @@ def index():
         schedule_tracking = 'schedule_tracking' in request.form
         schedule_interval = int(request.form.get('schedule_interval', 4)) if schedule_tracking else None
 
-        # Call the tracker logic and extract coupons
-        from product_tracker.tracker import scrape_price_and_coupon, schedule_product_tracking
-        price, title, coupon = scrape_price_and_coupon(product_url)
+        # Call the tracker logic
+        from product_tracker.tracker import scrape_price, schedule_product_tracking
+        price, title = scrape_price(product_url)
         result = track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates)
-        coupons = coupon
+        
         scheduled_msg = None
         if schedule_tracking:
             # Only support Telegram for scheduled jobs
@@ -36,9 +36,9 @@ def index():
             flash(scheduled_msg)
         else:
             flash(result)
-        return render_template('index.html', coupons=coupons, target_price=target_price, product_url=product_url)
+        return render_template('index.html', target_price=target_price, product_url=product_url)
     # Always return a response for GET requests
-    return render_template('index.html', coupons=coupons, target_price=target_price, product_url=product_url)
+    return render_template('index.html',  target_price=target_price, product_url=product_url)
 
 # Route to view scheduled products
 from product_tracker.tracker import scheduled_products
@@ -51,7 +51,7 @@ def view_scheduled():
         delete_scheduled(idx)
         return redirect(url_for('view_scheduled'))
     return render_template('scheduled.html', scheduled_products=scheduled_products)
-    return render_template('index.html', coupons=coupons, target_price=target_price, product_url=product_url)
+    return render_template('index.html',  target_price=target_price, product_url=product_url)
 
 if __name__ == '__main__':
     app.run(debug=True)
