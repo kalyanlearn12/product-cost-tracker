@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Cost Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { display: flex; gap: 40px; }
+        .left-panel { flex: 1; max-width: 400px; }
+        .right-panel { flex: 1; min-width: 300px; }
+        form { width: 100%; }
+        label { display: block; margin-top: 15px; }
+        input[type="text"], input[type="url"], input[type="number"], select {
+            width: 100%; padding: 8px; margin-top: 5px;
+        }
+        .checkbox-row {
+            display: flex; align-items: center; margin-top: 10px;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: auto; margin-right: 8px;
+        }
+        .schedule-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+        }
+        .schedule-row label { margin: 0; }
+        button { margin-top: 20px; padding: 10px 20px; }
+        .flash { color: green; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+      <div class="left-panel">
+        <h2>Track Product Price</h2>
+        <form method="post">
+            <label>Product URL:
+                <input type="url" name="product_url" required>
+            </label>
+            <label>Target Price:
+                <input type="number" name="target_price" required>
+            </label>
+            <label>Telegram Chat ID:
+                <input type="text" name="phone_or_chat" >
+            </label>
+            <div class="checkbox-row">
+                <input type="checkbox" name="check_alternates" id="check_alternates" checked>
+                <label for="check_alternates">Check alternate sites for best price</label>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" name="schedule_tracking" id="schedule_tracking" onchange="document.getElementById('schedule_time_row').style.display = this.checked ? 'flex' : 'none';">
+                <label for="schedule_tracking">Schedule this product for automatic tracking</label>
+            </div>
+            <div class="schedule-row" id="schedule_time_row" style="display:none;">
+                <label for="schedule_interval">Run every:</label>
+                <select name="schedule_interval" id="schedule_interval" style="width:120px;">
+                    <option value="1">1 minute (for testing)</option>
+                    <option value="2">2 hours</option>
+                    <option value="4" selected>4 hours</option>
+                    <option value="8">8 hours</option>
+                    <option value="16">16 hours</option>
+                    <option value="24">24 hours</option>
+                </select>
+            </div>
+            <button type="submit">Track</button>
+        </form>
+        <div style="margin-top:20px;">
+          <a href="/scheduled" target="_blank">View Scheduled Products</a>
+        </div>
+      </div>
+      <div class="right-panel">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="flash">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% if coupons %}
+          <div class="flash">Active Coupons: {{ coupons }}</div>
+        {% endif %}
+        {% if target_price %}
+          <div class="flash">Target Price: {{ target_price }}</div>
+        {% endif %}
+        {% if product_url %}
+          <div class="flash">Product URL: <a href="{{ product_url }}" target="_blank">{{ product_url }}</a></div>
+        {% endif %}
+      </div>
+    </div>
+</body>
+</html>

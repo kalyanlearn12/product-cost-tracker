@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scheduled Products</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+    <h2>Scheduled Products</h2>
+    {% if scheduled_products %}
+    <table>
+        <tr>
+            <th>Product URL</th>
+            <th>Target Price</th>
+            <th>Telegram Chat ID</th>
+            <th>Check Alternates</th>
+            <th>Interval (hours)</th>
+            <th>Delete</th>
+        </tr>
+        {% for item in scheduled_products %}
+        <tr>
+            <td><a href="{{ item.product_url }}" target="_blank">{{ item.product_url }}</a></td>
+            <td>{{ item.target_price }}</td>
+            <td>{{ item.telegram_chat_id }}</td>
+            <td>{{ 'Yes' if item.check_alternate_sites else 'No' }}</td>
+            <td>{{ item.schedule_interval }}</td>
+            <td>
+                <form method="post" style="margin:0;">
+                    <input type="hidden" name="delete_idx" value="{{ loop.index0 }}">
+                    <button type="submit" onclick="return confirm('Delete this scheduled product?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No products scheduled.</p>
+    {% endif %}
+</body>
+</html>
