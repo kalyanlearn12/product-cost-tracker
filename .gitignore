@@ -9,3 +9,8 @@ product_tracker/__pycache__/__init__.cpython-312.pyc
 product_tracker/__pycache__/config.cpython-312.pyc
 product_tracker/__pycache__/notifier.cpython-312.pyc
 product_tracker/__pycache__/scheduler.cpython-312.pyc
+chromedriver-win64/chromedriver.exe
+chromedriver-win64/LICENSE.chromedriver
+chromedriver-win64/THIRD_PARTY_NOTICES.chromedriver
+product_tracker/__pycache__/amazon.cpython-312.pyc
+product_tracker/__pycache__/myntra.cpython-312.pyc
