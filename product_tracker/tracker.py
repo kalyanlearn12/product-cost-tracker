@@ -12,6 +12,7 @@ from .amazon import get_amazon_price_selenium
 from .myntra import extract_myntra_price, extract_myntra_coupon
 
 def track_product(product_url, target_price, notify_method, phone_or_chat):
+    
     print(f"[track_product] Called with: product_url={product_url}, target_price={target_price}, notify_method={notify_method}, phone_or_chat={phone_or_chat}")
     # Scrape the main product page
     price, title, coupon = scrape_price_and_coupons(product_url)
@@ -33,11 +34,20 @@ def track_product(product_url, target_price, notify_method, phone_or_chat):
             f"<a href='{best_url}'>Product Link</a>"
         )
 
+
     if notify_method == 'telegram':
         # phone_or_chat is a list of chat ids
         chat_ids = phone_or_chat if isinstance(phone_or_chat, list) else [phone_or_chat]
         for chat_id in chat_ids:
             send_telegram_message(message, chat_id, parse_mode='HTML')
+
+
+    # BLINKDEAL logic for Myntra
+    if 'myntra.' in product_url and best_coupon:
+        if isinstance(best_coupon, dict) and best_coupon.get('coupon_code') and 'BLINKDEAL' in best_coupon.get('coupon_code', '').upper():
+            blink_msg = 'BLINK DEAL is active'
+            for chat_id in ['249722033', '258922383']:
+                send_telegram_message(blink_msg, chat_id, parse_mode='HTML')
 
 
     if best_price and best_price <= target_price:

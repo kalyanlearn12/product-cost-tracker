@@ -1,3 +1,28 @@
+def send_daily_tracking_summary():
+    from product_tracker.tracker import scheduled_products
+    from product_tracker.notifier import send_telegram_message
+    if not scheduled_products:
+        return
+    msg = '<b>Daily Tracking Summary (8 AM)</b>\n\n'
+    for item in scheduled_products:
+        url = item.get('product_url', '-')
+        price = item.get('target_price', '-')
+        interval = item.get('schedule_interval', '-')
+        start_time = item.get('start_time', '-')
+        chat_ids_raw = item.get('telegram_chat_ids', [])
+        chat_ids = []
+        for cid in chat_ids_raw:
+            if cid == '249722033':
+                chat_ids.append('kalyan')
+            elif cid == '258922383':
+                chat_ids.append('uma')
+            else:
+                chat_ids.append(cid)
+        chat_ids_str = ','.join(chat_ids)
+        # Show full URL as plain text (not clickable)
+        msg += f"<b>Target:</b> {price} | <b>Start:</b> {start_time}| <b>Freq(h):</b> {interval}  | <b>Messaing to:</b> {chat_ids_str} | {url}\n"
+    for chat_id in ['249722033', '258922383']:
+        send_telegram_message(msg, chat_id, parse_mode='HTML')
 import uuid
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
@@ -118,11 +143,13 @@ def delete_scheduled(idx):
         _refresh_all_jobs()
 
 def start_scheduler():
+    global _scheduler
+    # Schedule daily summary at 8am
     print(f"[start_scheduler] Called with no arguments")
     print(f"[start_scheduler] Returning: None")
-    global _scheduler
     _scheduler = BackgroundScheduler()
     _scheduler.start()
+    _scheduler.add_job(send_daily_tracking_summary, 'cron', hour=8 , minute=0 , id='daily_summary', replace_existing=True)
     atexit.register(lambda: _scheduler.shutdown())
     _refresh_all_jobs()
 
