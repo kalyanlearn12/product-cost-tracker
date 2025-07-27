@@ -7,6 +7,7 @@ import time
 CHROMEDRIVER_PATH = 'chromedriver-win64/chromedriver.exe'
 
 def get_amazon_price_selenium(url):
+    print(f"[get_amazon_price_selenium] Called with: url={url}")
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -37,4 +38,5 @@ def get_amazon_price_selenium(url):
                 continue
     finally:
         driver.quit()
+    print(f"[get_amazon_price_selenium] Returning: {price}")
     return price
