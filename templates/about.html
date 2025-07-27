@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}About | Venator{% endblock %}
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  .venator-heading { font-family: 'Pacifico', cursive; font-size: 3.2rem; letter-spacing: 2px; color: #2355d8; }
+  .pros-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.2rem; }
+  .pro-item {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #f3f8fd 60%, #e0e7ff 100%);
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(35,85,216,0.07);
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    transition: box-shadow 0.2s;
+  }
+  .pro-item:hover {
+    box-shadow: 0 4px 24px rgba(35,85,216,0.13);
+    background: linear-gradient(90deg, #e0e7ff 60%, #f3f8fd 100%);
+  }
+  .pro-icon {
+    font-size: 2.5rem;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(35,85,216,0.08));
+  }
+  /* Remove whitespace above the image and center it at the top */
+  .about-center-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    padding-top: 0 !important;
+  }
+  .about-hero-img {
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    max-height: 340px;
+    min-width: 220px;
+    object-fit: cover;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba(35,85,216,0.13);
+  }
+  .pro-desc {
+    font-size: 0.92rem;
+  }
+  @media (max-width: 991.98px) {
+    .about-center-col {
+      padding-top: 0 !important;
+    }
+    .about-hero-img {
+      margin-top: 0;
+    }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center align-items-start">
+    <div class="col-lg-3 d-none d-lg-flex flex-column align-items-end justify-content-center pros-col">
+      <div class="pros-list text-end">
+        <div class="pro-item flex-column align-items-end mb-4">
+          <span class="pro-icon text-primary mb-2" style="font-size:2.7rem;"><i class="bi bi-bell-fill"></i></span>
+          <div class="pro-title text-primary" style="font-size:1.2rem; font-weight:700;">Instant Alerts</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Get notified the moment your product hits your target price or a new coupon is found.</div>
+        </div>
+        <div class="pro-item flex-column align-items-end mb-4">
+          <span class="pro-icon text-success mb-2" style="font-size:2.7rem;"><i class="bi bi-robot"></i></span>
+          <div class="pro-title text-success" style="font-size:1.2rem; font-weight:700;">AI-powered Automation</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Checks prices and coupons for you daily, so you never miss a deal.</div>
+        </div>
+        <div class="pro-item flex-column align-items-end mb-4">
+          <span class="pro-icon text-danger mb-2" style="font-size:2.7rem;"><i class="bi bi-emoji-heart-eyes"></i></span>
+          <div class="pro-title text-danger" style="font-size:1.2rem; font-weight:700;">Save Time, Money & Effort</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Focus on what you love while we do the deal hunting for you.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 about-center-col">
+      <!-- Add mt-3 for space above the button -->
+      <a href="/form" class="btn btn-lg btn-primary px-5 py-2 mb-2 mt-3" style="top: 20px; font-size:1.3rem; font-weight:600; letter-spacing:1px;">Let's Start Hunt</a>
+      <img src="/static/LionessShopper.png" alt="Lioness shopper hunting for deals" class="img-fluid about-hero-img" />
+      <h1 class="venator-heading mb-2">Venator</h1>
+      <div class="mb-3">
+        <div class="display-6 fw-bold mb-2" style="color:#2355d8;">Track Prices. Save Big.</div>
+        <div class="fs-5 mb-1">Your AI-powered shopping assistant.</div>
+        <div class="fs-6 text-muted mb-2">Never miss a price drop or coupon again. Get instant alerts on Telegram or WhatsApp. Automate your savings with daily checks and smart notifications.</div>
+      </div>
+      <h5 class="fw-bold mt-2">Start tracking, start saving!</h5>
+    </div>
+    <div class="col-lg-3 d-none d-lg-flex flex-column align-items-start justify-content-center pros-col">
+      <div class="pros-list text-start">
+        <div class="pro-item flex-column align-items-start mb-4">
+          <span class="pro-icon text-info mb-2" style="font-size:2.7rem;"><i class="bi bi-telegram"></i></span>
+          <div class="pro-title text-info" style="font-size:1.2rem; font-weight:700;">Notifications Anywhere</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Receive updates on Telegram or WhatsApp, wherever you are.</div>
+        </div>
+        <div class="pro-item flex-column align-items-start mb-4">
+          <span class="pro-icon text-warning mb-2" style="font-size:2.7rem;"><i class="bi bi-clock-history"></i></span>
+          <div class="pro-title text-warning" style="font-size:1.2rem; font-weight:700;">Scheduled Daily Checks</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Never miss a price drop with automatic daily monitoring.</div>
+        </div>
+        <div class="pro-item flex-column align-items-start mb-4">
+          <span class="pro-icon text-secondary mb-2" style="font-size:2.7rem;"><i class="bi bi-bar-chart-fill"></i></span>
+          <div class="pro-title text-secondary" style="font-size:1.2rem; font-weight:700;">Track Multiple Products</div>
+          <div class="pro-desc small text-muted" style="max-width:180px;">Monitor all your favorite items across top e-commerce sites.</div>
+        </div>
+      </div>
+    </div>
+    <!-- For mobile, show all pros below the image -->
+    <div class="col-12 d-lg-none mt-4">
+      <div class="pros-list d-flex flex-wrap justify-content-center">
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-primary mb-2" style="font-size:2.2rem;"><i class="bi bi-bell-fill"></i></span>
+          <div class="pro-title text-primary" style="font-size:1.1rem; font-weight:700;">Instant Alerts</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Get notified the moment your product hits your target price or a new coupon is found.</div>
+        </div>
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-success mb-2" style="font-size:2.2rem;"><i class="bi bi-robot"></i></span>
+          <div class="pro-title text-success" style="font-size:1.1rem; font-weight:700;">AI-powered Automation</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Checks prices and coupons for you daily, so you never miss a deal.</div>
+        </div>
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-danger mb-2" style="font-size:2.2rem;"><i class="bi bi-emoji-heart-eyes"></i></span>
+          <div class="pro-title text-danger" style="font-size:1.1rem; font-weight:700;">Save Time, Money & Effort</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Focus on what you love while we do the deal hunting for you.</div>
+        </div>
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-info mb-2" style="font-size:2.2rem;"><i class="bi bi-telegram"></i></span>
+          <div class="pro-title text-info" style="font-size:1.1rem; font-weight:700;">Notifications Anywhere</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Receive updates on Telegram or WhatsApp, wherever you are.</div>
+        </div>
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-warning mb-2" style="font-size:2.2rem;"><i class="bi bi-clock-history"></i></span>
+          <div class="pro-title text-warning" style="font-size:1.1rem; font-weight:700;">Scheduled Daily Checks</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Never miss a price drop with automatic daily monitoring.</div>
+        </div>
+        <div class="pro-item flex-column align-items-center m-2">
+          <span class="pro-icon text-secondary mb-2" style="font-size:2.2rem;"><i class="bi bi-bar-chart-fill"></i></span>
+          <div class="pro-title text-secondary" style="font-size:1.1rem; font-weight:700;">Track Multiple Products</div>
+          <div class="pro-desc small text-muted text-center" style="max-width:180px;">Monitor all your favorite items across top e-commerce sites.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
