@@ -9,12 +9,21 @@ def index():
     
     target_price = None
     product_url = None
+    phone_or_chat = []
     if request.method == 'POST':
         product_url = request.form['product_url']
         target_price = float(request.form['target_price'])
         notify_method = 'telegram'
         check_alternates = 'check_alternates' in request.form
-        phone_or_chat = request.form['phone_or_chat'].strip() or '249722033'
+        # Handle multi-select and custom chat ids
+        chatid_pick = request.form.getlist('chatid_pick')
+        custom_chatids = request.form.get('custom_chatids', '').strip()
+        phone_or_chat = chatid_pick if chatid_pick else []
+        if custom_chatids:
+            # Split by comma, strip whitespace, ignore blanks
+            phone_or_chat += [cid.strip() for cid in custom_chatids.split(',') if cid.strip()]
+        if not phone_or_chat:
+            phone_or_chat = ['249722033']
         schedule_tracking = 'schedule_tracking' in request.form
         schedule_interval = int(request.form.get('schedule_interval', 4)) if schedule_tracking else None
 
@@ -22,7 +31,7 @@ def index():
         from product_tracker.tracker import scrape_price, schedule_product_tracking
         price, title = scrape_price(product_url)
         result = track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates)
-        
+
         scheduled_msg = None
         if schedule_tracking:
             # Only support Telegram for scheduled jobs
@@ -36,9 +45,10 @@ def index():
             flash(scheduled_msg)
         else:
             flash(result)
-        return render_template('index.html', target_price=target_price, product_url=product_url)
+        # Always return form values to preserve them
+        return render_template('index.html', target_price=target_price, product_url=product_url, phone_or_chat=phone_or_chat)
     # Always return a response for GET requests
-    return render_template('index.html',  target_price=target_price, product_url=product_url)
+    return render_template('index.html',  target_price=target_price, product_url=product_url, phone_or_chat=phone_or_chat)
 
 # Route to view scheduled products
 from product_tracker.tracker import scheduled_products

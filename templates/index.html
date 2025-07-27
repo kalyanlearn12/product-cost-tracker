@@ -38,8 +38,13 @@
             <label>Target Price:
                 <input type="number" name="target_price" required>
             </label>
-            <label>Telegram Chat ID:
-                <input type="text" name="phone_or_chat" >
+            <label>Telegram Chat IDs:
+                <select name="chatid_pick" id="chatid_pick" multiple size="3" style="width:100%;">
+                    <option value="249722033" {% if phone_or_chat and '249722033' in phone_or_chat %}selected{% endif %}>kalyan</option>
+                    <option value="258922383" {% if phone_or_chat and '258922383' in phone_or_chat %}selected{% endif %}>uma</option>
+                </select>
+                <input type="text" name="custom_chatids" id="custom_chatids" placeholder="Enter additional Chat IDs, comma separated" style="margin-top: 8px; width:100%;" value="{% if phone_or_chat %}{{ phone_or_chat|reject('in', ['249722033','258922383'])|join(', ') }}{% endif %}">
+                <small>You can select multiple from the list and/or enter additional chat IDs separated by commas.</small>
             </label>
             <div class="checkbox-row">
                 <input type="checkbox" name="check_alternates" id="check_alternates" checked>

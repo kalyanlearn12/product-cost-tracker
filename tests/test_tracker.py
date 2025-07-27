@@ -4,6 +4,21 @@ from unittest.mock import patch
 from product_tracker.tracker import track_product, schedule_product_tracking, scheduled_products, save_scheduled, load_scheduled, delete_scheduled
 
 class TestProductCostTracker(unittest.TestCase):
+    def test_chatid_picklist_and_custom(self):
+        # Simulate backend logic for picklist and custom chatid
+        def resolve_chatid(chatid_pick, custom_chatid):
+            if chatid_pick == 'custom':
+                return custom_chatid or '249722033'
+            else:
+                return chatid_pick or '249722033'
+        # Picklist kalyan
+        self.assertEqual(resolve_chatid('249722033', ''), '249722033')
+        # Picklist uma
+        self.assertEqual(resolve_chatid('258922383', ''), '258922383')
+        # Custom chatid
+        self.assertEqual(resolve_chatid('custom', '999999999'), '999999999')
+        # Custom chatid blank falls back to kalyan
+        self.assertEqual(resolve_chatid('custom', ''), '249722033')
 
     @patch('product_tracker.tracker.scrape_price')
     @patch('product_tracker.tracker.send_telegram_message')

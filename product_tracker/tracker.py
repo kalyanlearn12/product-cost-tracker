@@ -31,7 +31,7 @@ def _run_product_job(item):
         item['product_url'],
         item['target_price'],
         'telegram',
-        item['telegram_chat_id'],
+        item['telegram_chat_ids'],
         item['check_alternate_sites']
     )
 
@@ -76,11 +76,13 @@ def _refresh_all_jobs():
         _add_job_for_product(idx, item)
 
 def schedule_product_tracking(product_url, target_price, telegram_token, telegram_chat_id, check_alternate_sites=False, schedule_interval=4):
+    # Accepts telegram_chat_id as a list
+    chat_ids = telegram_chat_id if isinstance(telegram_chat_id, list) else [telegram_chat_id]
     scheduled_products.append({
         'product_url': product_url,
         'target_price': target_price,
         'telegram_token': telegram_token,
-        'telegram_chat_id': telegram_chat_id,
+        'telegram_chat_ids': chat_ids,
         'check_alternate_sites': check_alternate_sites,
         'schedule_interval': schedule_interval
     })
@@ -129,7 +131,10 @@ def track_product(product_url, target_price, notify_method, phone_or_chat, check
     if best_price and best_price <= target_price:
         message = f"Price Alert! {title}\nPrice: {best_price}\nTarget Price: {target_price}\nURL: {best_url}"
         if notify_method == 'telegram':
-            send_telegram_message(message, phone_or_chat)
+            # phone_or_chat is a list of chat ids
+            chat_ids = phone_or_chat if isinstance(phone_or_chat, list) else [phone_or_chat]
+            for chat_id in chat_ids:
+                send_telegram_message(message, chat_id)
         return f"Notification sent! Best price: {best_price}"
     return f"No deal found. Current best price: {best_price}"
 

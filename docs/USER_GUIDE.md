@@ -1,3 +1,37 @@
+# Product Cost Tracker User Guide
+
+## Features
+- Track product prices on Myntra and Amazon (Amazon may require manual verification due to anti-bot measures)
+- Schedule price checks and receive Telegram notifications
+- Choose a recipient from a picklist (Kalyan/Uma) or enter a custom Telegram chat ID
+- Fields are preserved after submitting the form for easy repeated tracking
+
+## How to Use
+1. **Open the Web App**: Run `python app.py` and open the provided URL in your browser.
+2. **Enter Product Details**:
+   - **Product URL**: Paste the product page URL (Myntra or Amazon).
+   - **Target Price**: Enter your desired price.
+   - **Telegram Chat ID**: Select "kalyan" or "uma" from the picklist, or choose "Other..." to enter a custom chat ID.
+3. **Options**:
+   - **Check alternate sites**: Enabled by default. The app will try to find better prices on alternate sites.
+   - **Schedule tracking**: Enable and select an interval to schedule automatic price checks.
+4. **Track**: Click the "Track" button. The form will retain your entries after submission.
+5. **View Scheduled Products**: Click the link to see all scheduled products and manage them.
+
+## Notes
+- Amazon price extraction may fail if Amazon blocks automated requests. For best results, use Myntra links.
+- The chat ID picklist is for convenience; you can always enter a new chat ID if needed.
+
+## Troubleshooting
+- If you do not receive notifications, verify your Telegram chat ID and bot permissions.
+- If Amazon prices are not found, try again later or use a Myntra link.
+
+## Example Chat IDs
+- kalyan: 249722033
+- uma: 258922383
+
+---
+For more details, see the README or contact the project maintainer.
 # Product Cost Tracker - User Guide
 
 ## Getting Started

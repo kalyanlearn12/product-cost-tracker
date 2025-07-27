@@ -26,7 +26,15 @@
         <tr>
             <td><a href="{{ item.product_url }}" target="_blank">{{ item.product_url }}</a></td>
             <td>{{ item.target_price }}</td>
-            <td>{{ item.telegram_chat_id }}</td>
+            <td>
+              {% if item.telegram_chat_ids %}
+                {{ item.telegram_chat_ids|join(', ') }}
+              {% elif item.telegram_chat_id %}
+                {{ item.telegram_chat_id }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
             <td>{{ 'Yes' if item.check_alternate_sites else 'No' }}</td>
             <td>{{ item.schedule_interval }}</td>
             <td>
