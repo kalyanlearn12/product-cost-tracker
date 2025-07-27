@@ -7,3 +7,5 @@ __pycache__/test_tracker.cpython-312.pyc
 __pycache__/tracker.cpython-312.pyc
 product_tracker/__pycache__/__init__.cpython-312.pyc
 product_tracker/__pycache__/config.cpython-312.pyc
+product_tracker/__pycache__/notifier.cpython-312.pyc
+product_tracker/__pycache__/scheduler.cpython-312.pyc
