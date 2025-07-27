@@ -39,8 +39,7 @@ def _run_product_job(item):
         item['product_url'],
         item['target_price'],
         'telegram',
-        item['telegram_chat_ids'],
-        item['check_alternate_sites']
+        item['telegram_chat_ids']
     )
 
 def _add_job_for_product(idx, item):
@@ -86,8 +85,8 @@ def _refresh_all_jobs():
     for idx, item in enumerate(scheduled_products):
         _add_job_for_product(idx, item)
 
-def schedule_product_tracking(product_url, target_price, telegram_token, telegram_chat_id, check_alternate_sites=False, schedule_interval=4):
-    print(f"[schedule_product_tracking] Called with: product_url={product_url}, target_price={target_price}, telegram_token={telegram_token}, telegram_chat_id={telegram_chat_id}, check_alternate_sites={check_alternate_sites}, schedule_interval={schedule_interval}")
+def schedule_product_tracking(product_url, target_price, telegram_token, telegram_chat_id, schedule_interval=4):
+    print(f"[schedule_product_tracking] Called with: product_url={product_url}, target_price={target_price}, telegram_token={telegram_token}, telegram_chat_id={telegram_chat_id}, schedule_interval={schedule_interval}")
     print(f"[schedule_product_tracking] Returning: None")
     chat_ids = telegram_chat_id if isinstance(telegram_chat_id, list) else [telegram_chat_id]
     scheduled_products.append({
@@ -95,7 +94,6 @@ def schedule_product_tracking(product_url, target_price, telegram_token, telegra
         'target_price': target_price,
         'telegram_token': telegram_token,
         'telegram_chat_ids': chat_ids,
-        'check_alternate_sites': check_alternate_sites,
         'schedule_interval': schedule_interval
     })
     save_scheduled(scheduled_products)

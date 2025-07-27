@@ -14,7 +14,7 @@ def index():
         product_url = request.form['product_url']
         target_price = float(request.form['target_price'])
         notify_method = 'telegram'
-        check_alternates = 'check_alternates' in request.form
+        # check_alternates removed
         # Handle multi-select and custom chat ids
         chatid_pick = request.form.getlist('chatid_pick')
         custom_chatids = request.form.get('custom_chatids', '').strip()
@@ -30,12 +30,12 @@ def index():
         # Call the tracker logic
         from product_tracker.tracker import scrape_price_and_coupons, schedule_product_tracking
         price, title, coupon = scrape_price_and_coupons(product_url)
-        result = track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates)
+        result = track_product(product_url, target_price, notify_method, phone_or_chat)
 
         scheduled_msg = None
         if schedule_tracking:
             # Only support Telegram for scheduled jobs
-            schedule_product_tracking(product_url, target_price, None, phone_or_chat, check_alternates, schedule_interval)
+            schedule_product_tracking(product_url, target_price, None, phone_or_chat, schedule_interval)
             scheduled_msg = f'Product scheduled for automatic tracking every {schedule_interval} hours.'
         # Show both messages if both exist
         if scheduled_msg and result:

@@ -5,7 +5,7 @@ from .scheduler import (
 )
 from bs4 import BeautifulSoup
 import requests
-from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CHECK_ALTERNATE_SITES, ALTERNATE_SITES
+from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 from .notifier import send_telegram_message
 from .amazon import get_amazon_price_selenium
@@ -18,9 +18,6 @@ def track_product(product_url, target_price, notify_method, phone_or_chat, check
     best_price = price
     best_url = product_url
     best_coupon = coupon
-    
-    
-    # If price is at or below target, notify
     if best_price and best_price <= target_price:
         message = (
             f"<b>🟢 Target Price Triggered!</b> <b>{title}</b>\n"
