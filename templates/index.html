@@ -1,58 +1,99 @@
+                <script>
+                  function toggleChatIdHelp() {
+                    const helpDiv = document.getElementById('chatid-help');
+                    helpDiv.classList.toggle('d-none');
+                  }
+                </script>
+                <div id="chatid-help" class="alert alert-info mt-2 d-none" style="font-size:0.97em;">
+                  <button type="button" class="btn-close float-end" aria-label="Close" onclick="document.getElementById('chatid-help').classList.add('d-none');"></button>
+                  <b>How to get your Telegram Chat ID:</b><br>
+                  1. Open Telegram and search for <b>@myn_price_track_bot</b>.<br>
+                  2. Start a chat with the bot and send any message.<br>
+                  3. The bot will reply with your Chat ID.<br>
+                  4. Use this Chat ID here to receive notifications.<br>
+                  <br>
+                  <b>Tip:</b> You can also add group Chat IDs. Add the bot to your group, send a message, and the bot will reply with the group Chat ID.
+                </div>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Product Cost Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { display: flex; gap: 40px; }
-        .left-panel { flex: 1; max-width: 400px; }
-        .right-panel { flex: 1; min-width: 300px; }
-        form { width: 100%; }
-        label { display: block; margin-top: 15px; }
-        input[type="text"], input[type="url"], input[type="number"], select {
-            width: 100%; padding: 8px; margin-top: 5px;
-        }
-        .checkbox-row {
-            display: flex; align-items: center; margin-top: 10px;
-        }
-        .checkbox-row input[type="checkbox"] {
-            width: auto; margin-right: 8px;
-        }
-        .schedule-row {
-            display: flex; align-items: center; gap: 10px; margin-top: 10px;
-        }
-        .schedule-row label { margin: 0; }
-        button { margin-top: 20px; padding: 10px 20px; }
-        .flash { color: green; margin-top: 20px; }
+        body { background: #f8fafc; }
+        .tracker-card { box-shadow: 0 2px 16px rgba(0,0,0,0.07); border-radius: 16px; background: #fff; padding: 2rem; margin-top: 2rem; }
+        .form-label { font-weight: 500; }
+        .btn-primary { background: linear-gradient(90deg, #4f8cff 0%, #2355d8 100%); border: none; }
+        .btn-primary:hover { background: linear-gradient(90deg, #2355d8 0%, #4f8cff 100%); }
+        .flash { margin-top: 1rem; }
+        .info-card { background: #e9f5ff; border-radius: 12px; padding: 1.2rem; margin-top: 1.5rem; }
+        .schedule-row { gap: 1rem; }
+        .form-check-label { margin-left: 0.5rem; }
+        .link-btn { text-decoration: none; color: #2355d8; font-weight: 500; }
+        .link-btn:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
-      <div class="left-panel">
-        <h2>Track Product Price</h2>
-        <form method="post">
-            <label>Product URL:
-                <input type="url" name="product_url" required>
-            </label>
-            <label>Target Price:
-                <input type="number" name="target_price" required>
-            </label>
-            <label>Telegram Chat IDs:
-                <select name="chatid_pick" id="chatid_pick" multiple size="3" style="width:100%;">
-                    <option value="249722033" {% if phone_or_chat and '249722033' in phone_or_chat %}selected{% endif %}>kalyan</option>
-                    <option value="258922383" {% if phone_or_chat and '258922383' in phone_or_chat %}selected{% endif %}>uma</option>
+      <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+          <div class="tracker-card">
+            <h2 class="mb-4 text-center">Product Cost Tracker</h2>
+            <form method="post">
+              <div class="mb-3">
+                <label for="product_url" class="form-label">
+                  Product URL
+                  <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Paste the full URL of the product you want to track from Amazon, Myntra, etc.">
+                    <i class="bi bi-info-circle-fill text-info"></i>
+                  </span>
+                </label>
+                <input type="url" class="form-control" name="product_url" id="product_url" required>
+              </div>
+              <div class="mb-3">
+                <label for="target_price" class="form-label">
+                  Target Price
+                  <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Set the price at which you want to be notified. You'll get alerts when the product drops to or below this price.">
+                    <i class="bi bi-info-circle-fill text-info"></i>
+                  </span>
+                </label>
+                <input type="number" class="form-control" name="target_price" id="target_price" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">
+                  Telegram Chat IDs
+                  <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Select or enter Telegram Chat IDs to receive notifications. Click for help on how to get your Chat ID." onclick="toggleChatIdHelp();">
+                    <i class="bi bi-info-circle-fill text-info" style="cursor:pointer;"></i>
+                  </span>
+                </label>
+                <select class="form-select" name="chatid_pick" id="chatid_pick" multiple size="3">
+                  <option value="249722033" {% if phone_or_chat and '249722033' in phone_or_chat %}selected{% endif %}>kalyan</option>
+                  <option value="258922383" {% if phone_or_chat and '258922383' in phone_or_chat %}selected{% endif %}>uma</option>
                 </select>
-                <input type="text" name="custom_chatids" id="custom_chatids" placeholder="Enter additional Chat IDs, comma separated" style="margin-top: 8px; width:100%;" value="{% if phone_or_chat %}{{ phone_or_chat|reject('in', ['249722033','258922383'])|join(', ') }}{% endif %}">
-                <small>You can select multiple from the list and/or enter additional chat IDs separated by commas.</small>
-            </label>
-            <div class="checkbox-row">
-                <input type="checkbox" name="schedule_tracking" id="schedule_tracking" onchange="document.getElementById('schedule_time_row').style.display = this.checked ? 'flex' : 'none';">
-                <label for="schedule_tracking">Schedule this product for automatic tracking</label>
-            </div>
-            <div class="schedule-row" id="schedule_time_row" style="display:none;">
-                <label for="schedule_interval">Frequency:</label>
-                <select name="schedule_interval" id="schedule_interval" style="width:120px;">
+                <input type="text" class="form-control mt-2" name="custom_chatids" id="custom_chatids" placeholder="Enter additional Chat IDs, comma separated" value="{% if phone_or_chat %}{{ phone_or_chat|reject('in', ['249722033','258922383'])|join(', ') }}{% endif %}">
+                <div class="form-text">Select from the list and/or enter additional chat IDs separated by commas.</div>
+                
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="schedule_tracking" id="schedule_tracking" onchange="document.getElementById('schedule_time_row').style.display = this.checked ? 'flex' : 'none';">
+                <label class="form-check-label" for="schedule_tracking">
+                  Schedule this product for automatic tracking
+                  <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Enable this to check the product price automatically at set intervals.">
+                    <i class="bi bi-info-circle-fill text-info"></i>
+                  </span>
+                </label>
+              </div>
+              <div class="row schedule-row mb-3" id="schedule_time_row" style="display:none;">
+                <div class="col-6">
+                  <label for="schedule_interval" class="form-label">
+                    Frequency
+                    <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="How often (in hours) the product price should be checked automatically.">
+                      <i class="bi bi-info-circle-fill text-info"></i>
+                    </span>
+                  </label>
+                  <select class="form-select" name="schedule_interval" id="schedule_interval">
                     <option value="1">Every 1 hour</option>
                     <option value="2">Every 2 hours</option>
                     <option value="4" selected>Every 4 hours</option>
@@ -61,40 +102,63 @@
                     <option value="12">Every 12 hours</option>
                     <option value="18">Every 18 hours</option>
                     <option value="24">Every 24 hours</option>
-                </select>
-                <label for="start_time" style="margin-left:10px;">Start time (24h):</label>
-                <input type="time" name="start_time" id="start_time" value="00:00" style="width:110px;">
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="start_time" class="form-label">
+                    Start time (24h)
+                    <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="The time of day when the first scheduled check should start (in 24-hour format).">
+                      <i class="bi bi-info-circle-fill text-info"></i>
+                    </span>
+                  </label>
+                  <input type="time" class="form-control" name="start_time" id="start_time" value="00:00">
+                </div>
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Track Product</button>
+              </div>
+            </form>
+            <div class="text-center mt-4">
+              <a href="/scheduled" class="link-btn" target="_blank">View Scheduled Products</a>
             </div>
-            <button type="submit">Track</button>
-        </form>
-        <div style="margin-top:20px;">
-          <a href="/scheduled" target="_blank">View Scheduled Products</a>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-8">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              {% for msg in messages %}
+                <div class="alert alert-success flash" role="alert">{{ msg }}</div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+          {% if target_price %}
+            <div class="alert alert-info flash">Target Price: {{ target_price }}</div>
+          {% endif %}
+          {% if product_url %}
+            <div class="alert alert-info flash">Product URL: <a href="{{ product_url }}" target="_blank">{{ product_url }}</a></div>
+          {% endif %}
+          {% if coupon_info %}
+            <div class="info-card">
+              <b>Coupon Info:</b><br>
+              {% if coupon_info.best_price %}Best Price: {{ coupon_info.best_price }}<br>{% endif %}
+              {% if coupon_info.applicable_on %}Applicable On: {{ coupon_info.applicable_on }}<br>{% endif %}
+              {% if coupon_info.coupon_code %}Coupon Code: <b>{{ coupon_info.coupon_code }}</b><br>{% endif %}
+              {% if coupon_info.coupon_discount %}Coupon Discount: {{ coupon_info.coupon_discount }}<br>{% endif %}
+            </div>
+          {% endif %}
         </div>
       </div>
-      <div class="right-panel">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for msg in messages %}
-              <div class="flash">{{ msg }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        {% if target_price %}
-          <div class="flash">Target Price: {{ target_price }}</div>
-        {% endif %}
-        {% if product_url %}
-          <div class="flash">Product URL: <a href="{{ product_url }}" target="_blank">{{ product_url }}</a></div>
-        {% endif %}
-        {% if coupon_info %}
-          <div class="flash">
-            <b>Coupon Info:</b><br>
-            {% if coupon_info.best_price %}Best Price: {{ coupon_info.best_price }}<br>{% endif %}
-            {% if coupon_info.applicable_on %}Applicable On: {{ coupon_info.applicable_on }}<br>{% endif %}
-            {% if coupon_info.coupon_code %}Coupon Code: <b>{{ coupon_info.coupon_code }}</b><br>{% endif %}
-            {% if coupon_info.coupon_discount %}Coupon Discount: {{ coupon_info.coupon_discount }}<br>{% endif %}
-          </div>
-        {% endif %}
-      </div>
     </div>
+</script>
+    <!-- Bootstrap JS and Bootstrap Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script>
+      // Enable Bootstrap tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    </script>
 </body>
 </html>
