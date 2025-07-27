@@ -11,8 +11,8 @@ from .notifier import send_telegram_message
 from .amazon import get_amazon_price_selenium
 from .myntra import extract_myntra_price, extract_myntra_coupon
 
-def track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates):
-    print(f"[track_product] Called with: product_url={product_url}, target_price={target_price}, notify_method={notify_method}, phone_or_chat={phone_or_chat}, check_alternates={check_alternates}")
+def track_product(product_url, target_price, notify_method, phone_or_chat):
+    print(f"[track_product] Called with: product_url={product_url}, target_price={target_price}, notify_method={notify_method}, phone_or_chat={phone_or_chat}")
     # Scrape the main product page
     price, title, coupon = scrape_price_and_coupons(product_url)
     best_price = price

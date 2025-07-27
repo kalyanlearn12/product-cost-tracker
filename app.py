@@ -29,7 +29,6 @@ def index():
 
         # Call the tracker logic
         from product_tracker.tracker import scrape_price_and_coupons, schedule_product_tracking
-        price, title, coupon = scrape_price_and_coupons(product_url)
         result = track_product(product_url, target_price, notify_method, phone_or_chat)
 
         scheduled_msg = None
