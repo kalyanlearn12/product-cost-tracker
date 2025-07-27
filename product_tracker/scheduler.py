@@ -47,22 +47,28 @@ def _add_job_for_product(idx, item):
     global _scheduler, _job_ids
     job_id = f"product_{idx}_{uuid.uuid4()}"
     interval = item.get('schedule_interval', 4)
-    if interval == 1:
-        job = _scheduler.add_job(
-            lambda i=item: _run_product_job(i),
-            'interval',
-            minutes=1,
-            id=job_id,
-            replace_existing=True
-        )
-    else:
-        job = _scheduler.add_job(
-            lambda i=item: _run_product_job(i),
-            'interval',
-            hours=interval,
-            id=job_id,
-            replace_existing=True
-        )
+    start_time = item.get('start_time', '00:00')
+    hour, minute = 0, 0
+    if start_time:
+        try:
+            hour, minute = map(int, start_time.split(':'))
+        except Exception:
+            hour, minute = 0, 0
+    job = _scheduler.add_job(
+        lambda i=item: _run_product_job(i),
+        'interval',
+        hours=interval,
+        next_run_time=None,
+        id=job_id,
+        replace_existing=True
+    )
+    # Set next_run_time to the next occurrence of the specified start_time
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    first_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if first_run < now:
+        first_run += timedelta(hours=interval)
+    job.modify(next_run_time=first_run)
     _job_ids[idx] = job_id
 
 def _remove_job_for_product(idx):
@@ -89,12 +95,15 @@ def schedule_product_tracking(product_url, target_price, telegram_token, telegra
     print(f"[schedule_product_tracking] Called with: product_url={product_url}, target_price={target_price}, telegram_token={telegram_token}, telegram_chat_id={telegram_chat_id}, schedule_interval={schedule_interval}")
     print(f"[schedule_product_tracking] Returning: None")
     chat_ids = telegram_chat_id if isinstance(telegram_chat_id, list) else [telegram_chat_id]
+def schedule_product_tracking(product_url, target_price, telegram_token, telegram_chat_id, schedule_interval=4, start_time='00:00'):
+    chat_ids = telegram_chat_id if isinstance(telegram_chat_id, list) else [telegram_chat_id]
     scheduled_products.append({
         'product_url': product_url,
         'target_price': target_price,
         'telegram_token': telegram_token,
         'telegram_chat_ids': chat_ids,
-        'schedule_interval': schedule_interval
+        'schedule_interval': schedule_interval,
+        'start_time': start_time
     })
     save_scheduled(scheduled_products)
     _refresh_all_jobs()

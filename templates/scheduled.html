@@ -18,12 +18,30 @@
             <th>Product URL</th>
             <th>Target Price</th>
             <th>Telegram Chat ID</th>
-            <th>Interval (hours)</th>
+            <th>Frequency (hours)</th>
+            <th>Start Time</th>
+            <th>Edit</th>
             <th>Delete</th>
         </tr>
         {% for item in scheduled_products %}
         <tr>
-            <td><a href="{{ item.product_url }}" target="_blank">{{ item.product_url }}</a></td>
+        <td><a href="{{ item.product_url }}" target="_blank">{{ item.product_url }}</a></td>
+        {% if edit_idx is defined and edit_idx == loop.index0 %}
+            <form method="post" style="margin:0;">
+                <td><input type="number" name="edit_target_price" value="{{ item.target_price }}" required style="width:90px;"></td>
+                <td><input type="text" name="edit_chat_ids" value="{{ item.telegram_chat_ids|join(', ') }}" required style="width:120px;"></td>
+                <td>
+                    <select name="edit_schedule_interval" style="width:90px;">
+                        {% for h in [1,2,4,6,8,12,18,24] %}
+                        <option value="{{h}}" {% if item.schedule_interval == h %}selected{% endif %}>{{h}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="time" name="edit_start_time" value="{{ item.start_time or '00:00' }}" style="width:90px;"></td>
+                <td><button type="submit" name="save_idx" value="{{ loop.index0 }}">Save</button></td>
+                <td><button type="submit" name="cancel_edit" value="1">Cancel</button></td>
+            </form>
+        {% else %}
             <td>{{ item.target_price }}</td>
             <td>
               {% if item.telegram_chat_ids %}
@@ -35,12 +53,20 @@
               {% endif %}
             </td>
             <td>{{ item.schedule_interval }}</td>
+            <td>{% if item.start_time %}{{ item.start_time }}{% else %}-{% endif %}</td>
             <td>
-                <form method="post" style="margin:0;">
+                <form method="post" style="margin:0;display:inline;">
+                    <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">
+                    <button type="submit">Edit</button>
+                </form>
+            </td>
+            <td>
+                <form method="post" style="margin:0;display:inline;">
                     <input type="hidden" name="delete_idx" value="{{ loop.index0 }}">
                     <button type="submit" onclick="return confirm('Delete this scheduled product?');">Delete</button>
                 </form>
             </td>
+        {% endif %}
         </tr>
         {% endfor %}
     </table>

@@ -51,15 +51,19 @@
                 <label for="schedule_tracking">Schedule this product for automatic tracking</label>
             </div>
             <div class="schedule-row" id="schedule_time_row" style="display:none;">
-                <label for="schedule_interval">Run every:</label>
+                <label for="schedule_interval">Frequency:</label>
                 <select name="schedule_interval" id="schedule_interval" style="width:120px;">
-                    <option value="1">1 minute (for testing)</option>
-                    <option value="2">2 hours</option>
-                    <option value="4" selected>4 hours</option>
-                    <option value="8">8 hours</option>
-                    <option value="16">16 hours</option>
-                    <option value="24">24 hours</option>
+                    <option value="1">Every 1 hour</option>
+                    <option value="2">Every 2 hours</option>
+                    <option value="4" selected>Every 4 hours</option>
+                    <option value="6">Every 6 hours</option>
+                    <option value="8">Every 8 hours</option>
+                    <option value="12">Every 12 hours</option>
+                    <option value="18">Every 18 hours</option>
+                    <option value="24">Every 24 hours</option>
                 </select>
+                <label for="start_time" style="margin-left:10px;">Start time (24h):</label>
+                <input type="time" name="start_time" id="start_time" value="00:00" style="width:110px;">
             </div>
             <button type="submit">Track</button>
         </form>

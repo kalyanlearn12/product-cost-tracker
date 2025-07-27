@@ -40,7 +40,7 @@ def extract_myntra_coupon(url):
         from selenium.webdriver.chrome.service import Service
         from bs4 import BeautifulSoup
         import time
-        print(f"1")
+        
         
         CHROMEDRIVER_PATH = 'chromedriver-win64/chromedriver.exe'
         options = Options()
@@ -48,18 +48,18 @@ def extract_myntra_coupon(url):
         options.add_argument('--lang=en-US')
         service = Service(CHROMEDRIVER_PATH)
         driver = webdriver.Chrome(service=service, options=options)
-        print(f"2")
+        
         driver.get(url)
-        print(f"3")
+        
         time.sleep(3)
         html = driver.page_source
-        print(f"4")
+        
         driver.quit()
-        print(f"5")
+        
         soup2 = BeautifulSoup(html, "html.parser")
-        print(f"6")
+        
         offer = soup2.find("div", class_="pdp-offers-offer")
-        print(f"7")
+        
         if offer:
             price_span = offer.find("span", class_="pdp-offers-price")
             if price_span:
