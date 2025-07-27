@@ -47,10 +47,6 @@
                 <small>You can select multiple from the list and/or enter additional chat IDs separated by commas.</small>
             </label>
             <div class="checkbox-row">
-                <input type="checkbox" name="check_alternates" id="check_alternates" checked>
-                <label for="check_alternates">Check alternate sites for best price</label>
-            </div>
-            <div class="checkbox-row">
                 <input type="checkbox" name="schedule_tracking" id="schedule_tracking" onchange="document.getElementById('schedule_time_row').style.display = this.checked ? 'flex' : 'none';">
                 <label for="schedule_tracking">Schedule this product for automatic tracking</label>
             </div>
@@ -84,6 +80,15 @@
         {% endif %}
         {% if product_url %}
           <div class="flash">Product URL: <a href="{{ product_url }}" target="_blank">{{ product_url }}</a></div>
+        {% endif %}
+        {% if coupon_info %}
+          <div class="flash">
+            <b>Coupon Info:</b><br>
+            {% if coupon_info.best_price %}Best Price: {{ coupon_info.best_price }}<br>{% endif %}
+            {% if coupon_info.applicable_on %}Applicable On: {{ coupon_info.applicable_on }}<br>{% endif %}
+            {% if coupon_info.coupon_code %}Coupon Code: <b>{{ coupon_info.coupon_code }}</b><br>{% endif %}
+            {% if coupon_info.coupon_discount %}Coupon Discount: {{ coupon_info.coupon_discount }}<br>{% endif %}
+          </div>
         {% endif %}
       </div>
     </div>

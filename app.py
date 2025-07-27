@@ -28,8 +28,8 @@ def index():
         schedule_interval = int(request.form.get('schedule_interval', 4)) if schedule_tracking else None
 
         # Call the tracker logic
-        from product_tracker.tracker import scrape_price, schedule_product_tracking
-        price, title = scrape_price(product_url)
+        from product_tracker.tracker import scrape_price_and_coupons, schedule_product_tracking
+        price, title, coupon = scrape_price_and_coupons(product_url)
         result = track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates)
 
         scheduled_msg = None

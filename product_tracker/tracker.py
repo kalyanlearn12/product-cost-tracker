@@ -9,25 +9,29 @@ from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CHECK_ALTERNATE_SITES,
 
 from .notifier import send_telegram_message
 from .amazon import get_amazon_price_selenium
-from .myntra import extract_myntra_price
+from .myntra import extract_myntra_price, extract_myntra_coupon
 
 def track_product(product_url, target_price, notify_method, phone_or_chat, check_alternates):
     # Scrape the main product page
-    price, title = scrape_price(product_url)
+    price, title, coupon = scrape_price_and_coupons(product_url)
     best_price = price
     best_url = product_url
+    best_coupon = coupon
+    
     
     # If price is at or below target, notify
     if best_price and best_price <= target_price:
         message = (
             f"<b>🟢 Target Price Triggered!</b> <b>{title}</b>\n"
             f"<b>Price:</b> {best_price}\n<b>Target Price:</b> {target_price}\n"
+            f"<b>Coupon:</b> {best_coupon}\n"
             f"<a href='{best_url}'>Product Link</a>"
         )
     else:
         message = (
             f"<b>🔴 Target Price Not Triggered Still!</b> <b>{title}</b>\n"
             f"<b>Price:</b> {best_price}\n<b>Target Price:</b> {target_price}\n"
+            f"<b>Coupon:</b> {best_coupon}\n"
             f"<a href='{best_url}'>Product Link</a>"
         )
 
@@ -39,32 +43,41 @@ def track_product(product_url, target_price, notify_method, phone_or_chat, check
 
 
     if best_price and best_price <= target_price:
-        return f"Notification sent! Best price: {best_price}"
+        return f"Notification sent! Best price: {best_price} \n | Coupon: {best_coupon} "
     else:
-        return f"No deal found. Current best price: {best_price}"
+        return f"No deal found. Current best price: {best_price} \n | Coupon: {best_coupon}"
 
-def scrape_price(url):
+
+
+
+
+
+
+def scrape_price_and_coupons(url):
     headers = {'User-Agent': 'Mozilla/5.0'}
     resp = requests.get(url, headers=headers)
     soup = BeautifulSoup(resp.text, 'html.parser')
     title = soup.title.string if soup.title else 'Product'
     price = None
+    coupon = None
 
     # Amazon-specific logic
     if 'amazon.' in url:
         price = get_amazon_price_selenium(url)
         if price is not None:
-            return price, title
+            return price, title, None
 
     # Myntra-specific logic
     if 'myntra.' in url:
         price = extract_myntra_price(soup)
         if price is not None:
-            return price, title
+            coupon = extract_myntra_coupon(url)
+            return price, title, coupon
 
     # Generic logic: look for ₹ or Rs in visible text
     price = extract_generic_rupee_price(soup)
-    return price, title
+    return price, title, None
+
 
 
 
@@ -79,21 +92,3 @@ def extract_generic_rupee_price(soup):
         except Exception:
             return None
     return None
-
-   
-    return price, title
-
-
-from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-import time
-
-# You need to download the ChromeDriver executable and put it in your PATH or specify its location below
-# Download from: https://chromedriver.chromium.org/downloads
-CHROMEDRIVER_PATH = 'chromedriver-win64/chromedriver.exe'  # Updated path
-
-
-
