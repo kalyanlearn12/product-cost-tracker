@@ -3,51 +3,187 @@
 {% block head %}
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 <style>
-  body { background: linear-gradient(120deg, #f3f8fd 60%, #e0e7ff 100%); }
   .scheduled-card {
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 4px 24px rgba(35,85,216,0.13);
-    padding: 2.7rem 2.2rem;
-    margin-top: 2.5rem;
-    border: 2.5px solid #2355d8;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    box-shadow: 0 8px 32px rgba(26, 35, 126, 0.15);
+    padding: 3rem 2.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(26, 35, 126, 0.1);
+    position: relative;
+    overflow: hidden;
   }
+  
+  .scheduled-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #1a237e, #3949ab, #5e35b1);
+  }
+  
   .venator-heading {
     font-family: 'Pacifico', cursive;
-    font-size: 2.5rem;
-    color: #2355d8;
+    font-size: 2.8rem;
+    background: linear-gradient(135deg, #1a237e 0%, #3949ab 50%, #5e35b1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: 2px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     text-align: center;
+    position: relative;
   }
+  
+  .venator-heading::after {
+    content: '🎯';
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+  }
+  
   .venator-table {
     border-collapse: separate;
-    border-spacing: 0 1rem;
+    border-spacing: 0 0.8rem;
     width: 100%;
+    margin-top: 1.5rem;
   }
-  .venator-table th, .venator-table td {
-    background: #fff;
-    border: 1.5px solid #e0e7ef;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  
+  .venator-table th {
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    color: white;
+    border: none;
     padding: 1rem 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .venator-table th:first-child {
+    border-radius: 12px 0 0 12px;
+  }
+  
+  .venator-table th:last-child {
+    border-radius: 0 12px 12px 0;
+  }
+  
+  .venator-table td {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(26, 35, 126, 0.1);
+    padding: 1rem 1.2rem;
+    transition: all 0.3s ease;
+    position: relative;
     vertical-align: middle;
   }
-  .venator-table th {
-    background: linear-gradient(90deg, #e0e7ff 60%, #f3f8fd 100%);
-    font-weight: 700;
-    font-size: 1.13rem;
-    border-bottom: 2.5px solid #b6c6e3;
-    color: #2355d8;
+  
+  .venator-table td:first-child {
+    border-radius: 12px 0 0 12px;
+  }
+  
+  .venator-table td:last-child {
+    border-radius: 0 12px 12px 0;
+  }
+  
+  .venator-table tr:hover td {
+    background: rgba(26, 35, 126, 0.05);
+    box-shadow: 0 4px 15px rgba(26, 35, 126, 0.1);
+  }
+  
+  .venator-table a { 
+    color: var(--venator-secondary); 
+    font-weight: 600; 
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .venator-table a:hover {
+    color: var(--venator-accent);
+    text-decoration: underline;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
+    transition: all 0.3s ease;
   }
-  .venator-table tr {
-    border-radius: 12px;
+  
+  .btn-warning {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    border: none;
+    color: white;
   }
-  .venator-table a { color: #2355d8; font-weight: 500; }
-  .venator-table tbody tr:hover {
-    background: #e9f5ff;
-    box-shadow: 0 2px 12px rgba(35,85,216,0.09);
-    transition: background 0.2s, box-shadow 0.2s;
+  
+  .btn-warning:hover {
+    background: linear-gradient(135deg, #f57c00, #e65100);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  }
+  
+  .btn-danger {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    border: none;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  }
+  
+  .btn-success {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    border: none;
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7d32);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  }
+  
+  .form-control, .form-select {
+    border: 1px solid rgba(26, 35, 126, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--venator-secondary);
+    box-shadow: 0 0 0 0.2rem rgba(57, 73, 171, 0.25);
+  }
+  
+  .no-products-msg {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #666;
+    font-size: 1.1rem;
+    background: rgba(26, 35, 126, 0.05);
+    border-radius: 15px;
+    border: 2px dashed rgba(26, 35, 126, 0.2);
+  }
+  
+  .no-products-msg i {
+    font-size: 3rem;
+    color: var(--venator-secondary);
+    margin-bottom: 1rem;
+    display: block;
   }
 </style>
 {% endblock %}
