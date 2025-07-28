@@ -96,17 +96,25 @@
         </div>
         <div class="mb-3">
           <label class="form-label">
-            Telegram Chat IDs
-            <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Select or enter Telegram Chat IDs to receive notifications. Click for help on how to get your Chat ID." onclick="toggleChatIdHelp();">
+            Telegram Recipients
+            <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="right" title="Select or enter Telegram nicknames and chat IDs to receive notifications. Click for help on how to get your Chat ID." onclick="toggleChatIdHelp();">
               <i class="bi bi-info-circle-fill text-info" style="cursor:pointer;"></i>
             </span>
           </label>
           <select class="form-select" name="chatid_pick" id="chatid_pick" multiple size="3">
-            <option value="249722033">kalyan</option>
-            <option value="258922383">uma</option>
+            {% for alias, chat_id in config.ALIAS_TO_ID.items() %}
+              <option value="{{ chat_id }}">{{ alias }}</option>
+            {% endfor %}
           </select>
-          <input type="text" class="form-control mt-2" name="custom_chatids" id="custom_chatids" placeholder="Enter additional Chat IDs, comma separated">
-          <div class="form-text">Select from the list and/or enter additional chat IDs separated by commas.</div>
+          <div class="row mt-2 g-2">
+            <div class="col-6">
+              <input type="text" class="form-control" name="new_alias" id="new_alias" placeholder="New Nickname (optional)">
+            </div>
+            <div class="col-6">
+              <input type="text" class="form-control" name="new_chatid" id="new_chatid" placeholder="New Chat ID (optional)">
+            </div>
+          </div>
+          <div class="form-text">Select from the list and/or add a new nickname and chat ID.</div>
           <div id="chatid-help" class="alert alert-info mt-2 d-none" style="font-size:0.97em;">
             <button type="button" class="btn-close float-end" aria-label="Close" onclick="document.getElementById('chatid-help').classList.add('d-none');"></button>
             <b>How to get your Telegram Chat ID:</b><br>

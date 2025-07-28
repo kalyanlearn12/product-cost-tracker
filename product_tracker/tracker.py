@@ -5,20 +5,32 @@ from .scheduler import (
 )
 from bs4 import BeautifulSoup
 import requests
-from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+
+from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ALIAS_TO_ID, ID_TO_ALIAS
 
 from .notifier import send_telegram_message
 from .amazon import get_amazon_price_selenium
 from .myntra import extract_myntra_price, extract_myntra_coupon
 
 def track_product(product_url, target_price, notify_method, phone_or_chat):
-    
     print(f"[track_product] Called with: product_url={product_url}, target_price={target_price}, notify_method={notify_method}, phone_or_chat={phone_or_chat}")
     # Scrape the main product page
     price, title, coupon = scrape_price_and_coupons(product_url)
     best_price = price
     best_url = product_url
     best_coupon = coupon
+
+    # Convert aliases to chat IDs if needed
+    chat_ids = []
+    for entry in (phone_or_chat if isinstance(phone_or_chat, list) else [phone_or_chat]):
+        if entry in ALIAS_TO_ID:
+            chat_ids.append(ALIAS_TO_ID[entry])
+        else:
+            chat_ids.append(entry)
+
+    # For display, show aliases if possible
+    display_aliases = [ID_TO_ALIAS.get(cid, cid) for cid in chat_ids]
+
     if best_price and best_price <= target_price:
         message = (
             f"<b>🟢 Target Price Triggered!</b> <b>{title}</b>\n"
@@ -34,13 +46,9 @@ def track_product(product_url, target_price, notify_method, phone_or_chat):
             f"<a href='{best_url}'>Product Link</a>"
         )
 
-
     if notify_method == 'telegram':
-        # phone_or_chat is a list of chat ids
-        chat_ids = phone_or_chat if isinstance(phone_or_chat, list) else [phone_or_chat]
         for chat_id in chat_ids:
             send_telegram_message(message, chat_id, parse_mode='HTML')
-
 
     # BLINKDEAL logic for Myntra
     if 'myntra.' in product_url and best_coupon:
@@ -49,13 +57,12 @@ def track_product(product_url, target_price, notify_method, phone_or_chat):
             for chat_id in ['249722033', '258922383']:
                 send_telegram_message(blink_msg, chat_id, parse_mode='HTML')
 
-
     if best_price and best_price <= target_price:
-        result = f"Notification sent! Best price: {best_price} \n | Coupon: {best_coupon} "
+        result = f"Notification sent to: {', '.join(display_aliases)}! Best price: {best_price} \n | Coupon: {best_coupon} "
         print(f"[track_product] Returning: {result}")
         return result
     else:
-        result = f"No deal found. Current best price: {best_price} \n | Coupon: {best_coupon}"
+        result = f"No deal found. Current best price: {best_price} \n | Coupon: {best_coupon} | Notified: {', '.join(display_aliases)}"
         print(f"[track_product] Returning: {result}")
         return result
 

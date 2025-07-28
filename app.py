@@ -1,6 +1,10 @@
 
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from product_tracker.tracker import track_product
+import product_tracker.config as config
+import json
+import os
 
 
 app = Flask(__name__)
@@ -22,10 +26,29 @@ def form_page():
         target_price = float(request.form['target_price'])
         notify_method = 'telegram'
         chatid_pick = request.form.getlist('chatid_pick')
-        custom_chatids = request.form.get('custom_chatids', '').strip()
+        # Handle new alias+chatid input
+        new_alias = request.form.get('new_alias', '').strip()
+        new_chatid = request.form.get('new_chatid', '').strip()
+        # If both new alias and chatid are provided and not already present, add to chat_aliases.json
+        if new_alias and new_chatid:
+            if new_alias not in config.ALIAS_TO_ID and new_chatid not in config.ID_TO_ALIAS:
+                # Append to chat_aliases.json
+                alias_path = os.path.join(os.path.dirname(config.__file__), 'chat_aliases.json')
+                try:
+                    with open(alias_path, 'r', encoding='utf-8') as f:
+                        aliases = json.load(f)
+                except Exception:
+                    aliases = []
+                aliases.append({'alias': new_alias, 'chat_id': new_chatid})
+                with open(alias_path, 'w', encoding='utf-8') as f:
+                    json.dump(aliases, f, indent=2)
+                # Update config in-memory
+                config.ALIAS_TO_ID[new_alias] = new_chatid
+                config.ID_TO_ALIAS[new_chatid] = new_alias
+                chatid_pick.append(new_chatid)
+        # Use selected chat IDs
         phone_or_chat = chatid_pick if chatid_pick else []
-        if custom_chatids:
-            phone_or_chat += [cid.strip() for cid in custom_chatids.split(',') if cid.strip()]
+        # If no chat IDs, fallback to default
         if not phone_or_chat:
             phone_or_chat = ['249722033']
         schedule_tracking = 'schedule_tracking' in request.form
@@ -44,8 +67,10 @@ def form_page():
             flash(scheduled_msg)
         else:
             flash(result)
-        return render_template('form.html', target_price=target_price, product_url=product_url, phone_or_chat=phone_or_chat, active_page='form')
-    return render_template('form.html', target_price=target_price, product_url=product_url, phone_or_chat=phone_or_chat, active_page='form')
+        # For display, show aliases if possible
+        display_aliases = [config.ID_TO_ALIAS.get(cid, cid) for cid in phone_or_chat]
+        return render_template('form.html', target_price=target_price, product_url=product_url, phone_or_chat=display_aliases, active_page='form', config=config)
+    return render_template('form.html', target_price=target_price, product_url=product_url, phone_or_chat=phone_or_chat, active_page='form', config=config)
 
 from product_tracker.tracker import scheduled_products
 
@@ -61,7 +86,11 @@ def tracking_table():
             idx = int(request.form['save_idx'])
             # Update the scheduled product
             target_price = float(request.form['edit_target_price'])
-            chat_ids = [cid.strip() for cid in request.form['edit_chat_ids'].split(',') if cid.strip()]
+            # Accept aliases from the form, convert to chat IDs
+            alias_str = request.form.get('edit_chat_aliases', '')
+            aliases = [a.strip() for a in alias_str.split(',') if a.strip()]
+            import product_tracker.config as config
+            chat_ids = [config.ALIAS_TO_ID.get(alias, alias) for alias in aliases]
             schedule_interval = int(request.form['edit_schedule_interval'])
             start_time = request.form.get('edit_start_time', '00:00')
             item = scheduled_products[idx]
@@ -75,7 +104,8 @@ def tracking_table():
             delete_scheduled(idx)
         elif 'cancel_edit' in request.form:
             pass  # Just reload, no edit_idx
-    return render_template('tracking.html', scheduled_products=scheduled_products, active_page='table', edit_idx=edit_idx)
+    import product_tracker.config as config
+    return render_template('tracking.html', scheduled_products=scheduled_products, active_page='table', edit_idx=edit_idx, config=config)
 
 
 

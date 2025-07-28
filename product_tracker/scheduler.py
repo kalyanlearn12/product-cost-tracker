@@ -79,21 +79,19 @@ def _add_job_for_product(idx, item):
             hour, minute = map(int, start_time.split(':'))
         except Exception:
             hour, minute = 0, 0
-    job = _scheduler.add_job(
-        lambda i=item: _run_product_job(i),
-        'interval',
-        hours=interval,
-        next_run_time=None,
-        id=job_id,
-        replace_existing=True
-    )
-    # Set next_run_time to the next occurrence of the specified start_time
     from datetime import datetime, timedelta
     now = datetime.now()
     first_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
     if first_run < now:
         first_run += timedelta(hours=interval)
-    job.modify(next_run_time=first_run)
+    job = _scheduler.add_job(
+        lambda i=item: _run_product_job(i),
+        'interval',
+        hours=interval,
+        next_run_time=first_run,
+        id=job_id,
+        replace_existing=True
+    )
     _job_ids[idx] = job_id
 
 def _remove_job_for_product(idx):
