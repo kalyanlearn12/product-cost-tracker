@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Debug Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-bug me-2"></i>Debug Dashboard
+                </h2>
+                <div class="badge bg-info fs-6">
+                    <i class="fas fa-clock me-1"></i>Last Updated: {{ current_time }}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Scheduler Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">Monitor the current scheduler state and active jobs.</p>
+                            <a href="/debug/scheduler" class="btn btn-success">
+                                <i class="fas fa-eye me-2"></i>View Scheduler Status
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-play me-2"></i>Manual Testing</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">Trigger individual products for immediate testing.</p>
+                            <div class="d-flex gap-2 flex-wrap mb-3">
+                                {% for product in products %}
+                                <a href="/debug/trigger/{{ loop.index0 }}" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-bolt me-1"></i>Product {{ loop.index }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="d-grid">
+                                <a href="/debug/scheduler/trigger-all" class="btn btn-warning">
+                                    <i class="fas fa-rocket me-2"></i>Trigger All Products Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Products Overview -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Scheduled Products ({{ products|length }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 50px;">ID</th>
+                                    <th>Product</th>
+                                    <th style="width: 120px;">Target Price</th>
+                                    <th style="width: 100px;">Schedule</th>
+                                    <th style="width: 80px;">Start Time</th>
+                                    <th style="width: 100px;">Next Runs</th>
+                                    <th style="width: 150px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ loop.index0 }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if 'myntra.com' in product.product_url %}
+                                                <i class="fab fa-shopify text-pink me-2"></i>
+                                                <span class="text-muted">Myntra</span>
+                                            {% elif 'amazon.in' in product.product_url %}
+                                                <i class="fab fa-amazon text-warning me-2"></i>
+                                                <span class="text-muted">Amazon</span>
+                                            {% elif 'upstox.com' in product.product_url %}
+                                                <i class="fas fa-chart-line text-success me-2"></i>
+                                                <span class="text-muted">Gold Rates</span>
+                                            {% elif 'screener.in' in product.product_url %}
+                                                <i class="fas fa-chart-bar text-info me-2"></i>
+                                                <span class="text-muted">Stocks</span>
+                                            {% else %}
+                                                <i class="fas fa-link text-secondary me-2"></i>
+                                                <span class="text-muted">Other</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted d-block mt-1" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            {{ product.product_url }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">₹{{ "{:,.0f}".format(product.target_price) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ product.schedule_interval }}h</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-dark">{{ product.start_time }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% set hours = [] %}
+                                            {% set start_hour = product.start_time.split(':')[0]|int %}
+                                            {% for i in range(0, 24, product.schedule_interval) %}
+                                                {% set next_hour = (start_hour + i) % 24 %}
+                                                {% if hours.append(next_hour) %}{% endif %}
+                                            {% endfor %}
+                                            {% for hour in hours[:3] %}
+                                                {{ "%02d:00"|format(hour) }}
+                                                {% if not loop.last %}<br>{% endif %}
+                                            {% endfor %}
+                                            {% if hours|length > 3 %}
+                                                <br><span class="text-muted">+{{ hours|length - 3 }} more</span>
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm" role="group">
+                                            <a href="/debug/trigger/{{ loop.index0 }}" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-play me-1"></i>Test Now
+                                            </a>
+                                            <a href="{{ product.product_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-external-link-alt me-1"></i>View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debug Information -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Schedule Logic</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-check text-success me-2"></i>Cron-based scheduling</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Fixed time intervals</li>
+                                <li><i class="fas fa-check text-success me-2"></i>No time drift</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Predictable runs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">Total Chat IDs: <strong>{{ total_chat_ids }}</strong></p>
+                            <p class="mb-0">Active Products: <strong>{{ products|length }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Quick Links</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="/" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-home me-2"></i>Home
+                                </a>
+                                <a href="/tracking" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-calendar me-2"></i>Scheduled
+                                </a>
+                                <a href="/" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-info me-2"></i>About
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Pro Tip:</strong> Use "Test Now" buttons to verify your products are working correctly. 
+                        The scheduler status page shows real-time job information and next run times.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.text-pink {
+    color: #e91e63 !important;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 2px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+    background: linear-gradient(135deg, #e7f3ff 0%, #f8f9fa 100%);
+}
+</style>
+{% endblock %}

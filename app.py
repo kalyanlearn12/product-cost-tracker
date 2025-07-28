@@ -107,6 +107,200 @@ def tracking_table():
     import product_tracker.config as config
     return render_template('tracking.html', scheduled_products=scheduled_products, active_page='table', edit_idx=edit_idx, config=config)
 
+@app.route('/debug')
+def debug_dashboard():
+    """Main debug dashboard showing all products and debug links"""
+    from datetime import datetime
+    
+    # Count unique chat IDs
+    all_chat_ids = set()
+    for product in scheduled_products:
+        if product.get('telegram_chat_ids'):
+            all_chat_ids.update(product['telegram_chat_ids'])
+    
+    return render_template('debug.html', 
+                         products=scheduled_products,
+                         total_chat_ids=len(all_chat_ids),
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         active_page='debug')
+
+@app.route('/debug/scheduler')
+def debug_scheduler():
+    """Debug endpoint to check scheduler status"""
+    from product_tracker.scheduler import get_scheduler_status, trigger_job_now
+    
+    # Get scheduler status
+    status = get_scheduler_status()
+    
+    # Manual trigger if requested
+    trigger_idx = request.args.get('trigger')
+    trigger_result = None
+    if trigger_idx is not None:
+        try:
+            trigger_result = trigger_job_now(int(trigger_idx))
+        except:
+            trigger_result = "Invalid trigger index"
+    
+    # Create HTML response
+    html = f"""
+    <html>
+    <head><title>Scheduler Debug</title></head>
+    <body style="font-family: Arial; margin: 20px;">
+        <h1>🔍 Scheduler Debug Information</h1>
+        
+        <h2>Status: {status['status']}</h2>
+        <p><strong>Total Jobs:</strong> {status['total_jobs']}</p>
+        
+        <h2>📋 Current Jobs</h2>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>Index</th>
+                <th>Job ID</th>
+                <th>Interval (hrs)</th>
+                <th>Start Time</th>
+                <th>Schedule Pattern</th>
+                <th>Next Run</th>
+                <th>Product URL</th>
+                <th>Actions</th>
+            </tr>
+    """
+    
+    for job in status['jobs']:
+        html += f"""
+            <tr>
+                <td>{job['idx']}</td>
+                <td>{job['job_id']}</td>
+                <td>{job.get('interval', 'N/A')}</td>
+                <td>{job.get('start_time', 'N/A')}</td>
+                <td style="font-family: monospace; font-size: 0.8em;">{job.get('schedule_pattern', 'N/A')}</td>
+                <td>{job['next_run']}</td>
+                <td style="max-width: 300px; word-break: break-all;">{job['product_url']}</td>
+                <td><a href="?trigger={job['idx']}" style="background: #007bff; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Trigger Now</a></td>
+            </tr>
+        """
+    
+    html += """
+        </table>
+        
+        <h2>📝 Scheduled Products</h2>
+        <pre>
+    """
+    
+    for i, product in enumerate(scheduled_products):
+        html += f"[{i}] {product}\n"
+    
+    html += "</pre>"
+    
+    if trigger_result:
+        html += f"""
+        <h2>🚀 Manual Trigger Result</h2>
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+            {trigger_result}
+        </div>
+        """
+    
+    html += """
+        <p><a href="/tracking">← Back to Tracking</a></p>
+        <p><a href="/debug/scheduler/trigger-all">🚀 Trigger All Jobs Now (Test)</a></p>
+    </body>
+    </html>
+    """
+    
+    return html
+
+@app.route('/debug/trigger/<int:product_id>')
+def debug_trigger_product(product_id):
+    """Trigger a specific product job immediately"""
+    from product_tracker.scheduler import trigger_job_now
+    
+    try:
+        result = trigger_job_now(product_id)
+        return f"""
+        <html>
+        <head>
+            <title>Trigger Result</title>
+            <meta http-equiv="refresh" content="3;url=/debug">
+        </head>
+        <body style="font-family: Arial; margin: 20px; text-align: center;">
+            <h2>🚀 Manual Trigger Result</h2>
+            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin: 20px auto; max-width: 600px;">
+                <strong>Product {product_id}:</strong> {result}
+            </div>
+            <p>Redirecting to debug dashboard in 3 seconds...</p>
+            <p><a href="/debug">← Back to Debug Dashboard</a></p>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        return f"""
+        <html>
+        <head>
+            <title>Trigger Error</title>
+            <meta http-equiv="refresh" content="3;url=/debug">
+        </head>
+        <body style="font-family: Arial; margin: 20px; text-align: center;">
+            <h2>❌ Trigger Error</h2>
+            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin: 20px auto; max-width: 600px;">
+                <strong>Product {product_id}:</strong> Error - {str(e)}
+            </div>
+            <p>Redirecting to debug dashboard in 3 seconds...</p>
+            <p><a href="/debug">← Back to Debug Dashboard</a></p>
+        </body>
+        </html>
+        """
+
+@app.route('/debug/scheduler/trigger-all')
+def debug_trigger_all():
+    """Trigger all scheduled jobs immediately for testing"""
+    from product_tracker.scheduler import trigger_job_now
+    
+    results = []
+    success_count = 0
+    for i in range(len(scheduled_products)):
+        try:
+            result = trigger_job_now(i)
+            results.append(f"Product {i}: ✅ {result}")
+            success_count += 1
+        except Exception as e:
+            results.append(f"Product {i}: ❌ ERROR - {str(e)}")
+    
+    html = f"""
+    <html>
+    <head>
+        <title>Trigger All Jobs</title>
+        <meta http-equiv="refresh" content="5;url=/debug">
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; text-align: center; }}
+            .success {{ color: #28a745; }}
+            .error {{ color: #dc3545; }}
+            .results {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 800px; text-align: left; }}
+        </style>
+    </head>
+    <body>
+        <h1>🚀 Triggered All Jobs</h1>
+        <div class="success">
+            <h2>Successfully triggered {success_count}/{len(scheduled_products)} products</h2>
+        </div>
+        
+        <div class="results">
+            <h3>Detailed Results:</h3>
+            <ul>
+    """
+    
+    for result in results:
+        html += f"<li>{result}</li>"
+    
+    html += """
+            </ul>
+        </div>
+        <p>Redirecting to debug dashboard in 5 seconds...</p>
+        <p><a href="/debug">← Back to Debug Dashboard</a></p>
+    </body>
+    </html>
+    """
+    
+    return html
+
 
 
 if __name__ == '__main__':

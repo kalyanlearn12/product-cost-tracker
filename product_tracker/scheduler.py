@@ -59,40 +59,100 @@ _job_ids = {}
 
 def _run_product_job(item):
     print(f"[_run_product_job] Called with: item={item}")
-    from product_tracker.tracker import track_product
-    track_product(
-        item['product_url'],
-        item['target_price'],
-        'telegram',
-        item['telegram_chat_ids']
-    )
+    try:
+        from product_tracker.tracker import track_product
+        print(f"[_run_product_job] Starting tracking for {item['product_url']}")
+        result = track_product(
+            item['product_url'],
+            item['target_price'],
+            'telegram',
+            item['telegram_chat_ids']
+        )
+        print(f"[_run_product_job] Tracking completed successfully: {result}")
+        return result
+    except Exception as e:
+        print(f"[_run_product_job] ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Send error notification
+        from product_tracker.notifier import send_telegram_message
+        error_msg = f"🚨 Scheduled job failed!\n\nURL: {item['product_url']}\nError: {str(e)}"
+        for chat_id in item['telegram_chat_ids']:
+            try:
+                send_telegram_message(error_msg, chat_id)
+            except:
+                pass
 
 def _add_job_for_product(idx, item):
     print(f"[_add_job_for_product] Called with: idx={idx}, item={item}")
     global _scheduler, _job_ids
-    job_id = f"product_{idx}_{uuid.uuid4()}"
+    
+    if _scheduler is None:
+        print(f"[_add_job_for_product] Scheduler not initialized!")
+        return
+        
+    job_id = f"product_{idx}_{uuid.uuid4().hex[:8]}"
     interval = item.get('schedule_interval', 4)
     start_time = item.get('start_time', '00:00')
+    
     hour, minute = 0, 0
     if start_time:
         try:
             hour, minute = map(int, start_time.split(':'))
-        except Exception:
+        except Exception as e:
+            print(f"[_add_job_for_product] Invalid start_time format: {start_time}, using 00:00")
             hour, minute = 0, 0
-    from datetime import datetime, timedelta
-    now = datetime.now()
-    first_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    if first_run < now:
-        first_run += timedelta(hours=interval)
-    job = _scheduler.add_job(
-        lambda i=item: _run_product_job(i),
-        'interval',
-        hours=interval,
-        next_run_time=first_run,
-        id=job_id,
-        replace_existing=True
-    )
-    _job_ids[idx] = job_id
+    
+    try:
+        # Calculate all the hours when the job should run based on start_time and interval
+        run_hours = []
+        current_hour = hour
+        
+        # Generate all run hours for a 24-hour period
+        while len(run_hours) < 24 // interval:
+            run_hours.append(current_hour % 24)
+            current_hour += interval
+            if current_hour >= 24 and current_hour % 24 in run_hours:
+                break
+                
+        print(f"[_add_job_for_product] Calculated run hours: {run_hours}")
+        
+        # Use cron scheduling to run at specific hours
+        if len(run_hours) == 1:
+            # Single run per day
+            job = _scheduler.add_job(
+                lambda i=item: _run_product_job(i),
+                'cron',
+                hour=run_hours[0],
+                minute=minute,
+                id=job_id,
+                replace_existing=True,
+                coalesce=True,
+                max_instances=1
+            )
+        else:
+            # Multiple runs per day - use comma-separated hours
+            hours_str = ','.join(map(str, run_hours))
+            job = _scheduler.add_job(
+                lambda i=item: _run_product_job(i),
+                'cron',
+                hour=hours_str,
+                minute=minute,
+                id=job_id,
+                replace_existing=True,
+                coalesce=True,
+                max_instances=1
+            )
+        
+        _job_ids[idx] = job_id
+        print(f"[_add_job_for_product] Job {job_id} scheduled successfully with cron pattern")
+        print(f"[_add_job_for_product] Run hours: {run_hours} at minute: {minute}")
+        print(f"[_add_job_for_product] Next run: {job.next_run_time}")
+        
+    except Exception as e:
+        print(f"[_add_job_for_product] ERROR adding job: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 def _remove_job_for_product(idx):
     print(f"[_remove_job_for_product] Called with: idx={idx}")
@@ -140,15 +200,115 @@ def delete_scheduled(idx):
         save_scheduled(scheduled_products)
         _refresh_all_jobs()
 
+def get_scheduler_status():
+    """Get current scheduler status and job information"""
+    global _scheduler, _job_ids
+    
+    if _scheduler is None:
+        return {"status": "not_initialized", "jobs": []}
+    
+    status = {
+        "status": "running" if _scheduler.running else "stopped",
+        "jobs": [],
+        "total_jobs": len(_job_ids)
+    }
+    
+    for idx, job_id in _job_ids.items():
+        job = _scheduler.get_job(job_id)
+        if job:
+            # Get schedule pattern info
+            trigger_info = str(job.trigger)
+            schedule_pattern = "Unknown"
+            
+            if hasattr(job.trigger, 'fields'):
+                try:
+                    hour_field = job.trigger.fields[1]  # hour field
+                    minute_field = job.trigger.fields[0]  # minute field
+                    schedule_pattern = f"Hours: {hour_field}, Minutes: {minute_field}"
+                except:
+                    schedule_pattern = trigger_info
+            
+            status["jobs"].append({
+                "idx": idx,
+                "job_id": job_id,
+                "next_run": str(job.next_run_time) if job.next_run_time else "None",
+                "schedule_pattern": schedule_pattern,
+                "interval": scheduled_products[idx]['schedule_interval'] if idx < len(scheduled_products) else "Unknown",
+                "start_time": scheduled_products[idx]['start_time'] if idx < len(scheduled_products) else "Unknown",
+                "product_url": scheduled_products[idx]['product_url'] if idx < len(scheduled_products) else "Unknown"
+            })
+        else:
+            status["jobs"].append({
+                "idx": idx,
+                "job_id": job_id,
+                "next_run": "Job not found!",
+                "schedule_pattern": "Error",
+                "interval": "Unknown",
+                "start_time": "Unknown",
+                "product_url": "Unknown"
+            })
+    
+    return status
+
+def trigger_job_now(idx):
+    """Manually trigger a specific job for testing"""
+    global _scheduler, _job_ids
+    
+    if idx >= len(scheduled_products):
+        return f"Invalid index: {idx}"
+    
+    item = scheduled_products[idx]
+    try:
+        print(f"[trigger_job_now] Manually triggering job for idx={idx}")
+        result = _run_product_job(item)
+        return f"Job triggered successfully: {result}"
+    except Exception as e:
+        return f"Job failed: {str(e)}"
+
 def start_scheduler():
     global _scheduler
-    # Schedule daily summary at 8am
     print(f"[start_scheduler] Called with no arguments")
-    print(f"[start_scheduler] Returning: None")
-    _scheduler = BackgroundScheduler()
+    
+    if _scheduler is not None:
+        print(f"[start_scheduler] Scheduler already running, skipping...")
+        return
+        
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.executors.pool import ThreadPoolExecutor
+    
+    # Configure scheduler with better settings  
+    executors = {
+        'default': ThreadPoolExecutor(20),
+    }
+    
+    job_defaults = {
+        'coalesce': True,  # Combine missed executions
+        'max_instances': 3,  # Allow up to 3 instances of same job
+        'misfire_grace_time': 60  # Grace period for missed jobs (60 seconds)
+    }
+    
+    _scheduler = BackgroundScheduler(executors=executors, job_defaults=job_defaults)
     _scheduler.start()
-    _scheduler.add_job(send_daily_tracking_summary, 'cron', hour=8 , minute=0 , id='daily_summary', replace_existing=True)
+    
+    # Schedule daily summary at 8am
+    _scheduler.add_job(
+        send_daily_tracking_summary, 
+        'cron', 
+        hour=8, 
+        minute=0, 
+        id='daily_summary', 
+        replace_existing=True
+    )
+    
+    print(f"[start_scheduler] Scheduler started successfully")
+    print(f"[start_scheduler] Returning: None")
+    
     atexit.register(lambda: _scheduler.shutdown())
     _refresh_all_jobs()
+    
+    # Add logging for job events
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    _scheduler._logger.setLevel(logging.DEBUG)
 
 start_scheduler()
