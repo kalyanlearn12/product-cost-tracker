@@ -62,7 +62,7 @@ def track_product(product_url, target_price, notify_method, phone_or_chat):
         print(f"[track_product] Returning: {result}")
         return result
     else:
-        result = f"No deal found. Current best price: {best_price} \n | Coupon: {best_coupon} | Notified: {', '.join(display_aliases)}"
+        result = f"Notification sent to: {', '.join(display_aliases)}! Current best price: {best_price} \n | Coupon: {best_coupon} (Target not met)"
         print(f"[track_product] Returning: {result}")
         return result
 
