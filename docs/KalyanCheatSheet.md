@@ -1,41 +1,26 @@
-# MongoDB Atlas Setup Guide
+##  Telegram Related
+The bot will reply with your Chat ID and can be fetched using https://api.telegram.org/bot7675172119:AAFYBpcPJrvx3HItlJRSg769iUdsMNRe8G8/getUpdates
 
-This guide explains how to set up MongoDB Atlas for cloud deployment while keeping JSON fallback for local development.
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', None)
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '249722033')
 
-## 🏗️ Architecture Overview
 
-- **Local Development**: Uses JSON files (`scheduled_products.json`)
-- **Cloud Production**: Uses MongoDB Atlas (free tier)
-- **Automatic Fallback**: App gracefully handles both scenarios
+## For local, gets from .env file. this is to send notifications to telegram
+TELEGRAM_BOT_TOKEN=7675172119:AAFYBpcPJrvx3HItlJRSg769iUdsMNRe8G8
 
-## 🌍 MongoDB Atlas Setup (Free Tier)
+## For local, gets from .env file and used for security aspects
+SECRET_KEY=921bea01571763abc2afdcc4731718d95e780db60a5ae9e2ef655a921c256d03
 
-### Step 1: Create MongoDB Atlas Account
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Click "Try Free" and create an account
-3. Choose "Build a Database" → "M0 Sandbox" (Free Forever)
 
-### Step 2: Configure Database
-1. **Cloud Provider**: Choose AWS, Google Cloud, or Azure
-2. **Region**: Select closest to your deployment region
+
+##  MongoDB Related (Free Tier)
+
 3. **Cluster Name**: `product-tracker-cluster`
-4. Click "Create Cluster"
-
-### Step 3: Set Up Database User
-1. Go to "Database Access" in left sidebar
-2. Click "Add New Database User"
 3. **Authentication Method**: Password
 4. **Username**: `product_tracker_user`
-5. **Password**: Generate secure password (save it!)
-6. **Database User Privileges**: "Read and write to any database"
-7. Click "Add User"
-
-### Step 4: Configure Network Access
-1. Go to "Network Access" in left sidebar
-2. Click "Add IP Address"
+5. **Password**: Generate secure password (save it!)    ---> 5Sageywemmbfa0ms
 3. **For Render deployment**: Select "Allow Access from Anywhere" (0.0.0.0/0)
 4. **For security**: You can restrict to specific IPs later
-5. Click "Confirm"
 
 ### Step 5: Get Connection String
 1. Go to "Database" → "Connect"
@@ -46,6 +31,11 @@ This guide explains how to set up MongoDB Atlas for cloud deployment while keepi
    mongodb+srv://product_tracker_user:<password>@product-tracker-cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority
    ```
 
+
+5. Actual is mongodb+srv://product_tracker_user:<db_password>@product-tracker-cluster.aenuves.mongodb.net/?retryWrites=true&w=majority&appName=product-tracker-cluster
+
+Local is running on JSON
+Render is on Mongo DB cloud
 
 
 
