@@ -36,8 +36,8 @@
                                 <div class="form-text">Enter the Telegram chat ID number</div>
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" name="action" value="add" class="btn btn-success">
-                                    <i class="fas fa-plus me-2"></i>Add Alias
+                                <button type="submit" name="action" value="add" class="btn btn-success" title="Add this alias to your chat list">
+                                    <i class="fas fa-plus me-2"></i>Add New Chat Alias
                                 </button>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
                                     <th>Alias (Nickname)</th>
                                     <th>Chat ID</th>
                                     <th style="width: 120px;">Used In</th>
-                                    <th style="width: 100px;">Actions</th>
+                                    <th style="width: 200px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,12 +82,12 @@
                                             <span class="badge bg-info">{{ usage_count[alias.chat_id] or 0 }} hunts</span>
                                         </td>
                                         <td>
-                                            <div class="btn-group-sm" role="group">
-                                                <button type="submit" name="action" value="save" class="btn btn-success btn-sm">
-                                                    <i class="fas fa-save"></i>
+                                            <div class="btn-group-sm d-flex gap-1" role="group">
+                                                <button type="submit" name="action" value="save" class="btn btn-success btn-sm" title="Save changes to this alias">
+                                                    <i class="fas fa-save me-1"></i>Save Changes
                                                 </button>
-                                                <button type="submit" name="action" value="cancel" class="btn btn-secondary btn-sm">
-                                                    <i class="fas fa-times"></i>
+                                                <button type="submit" name="action" value="cancel" class="btn btn-secondary btn-sm" title="Cancel editing and discard changes">
+                                                    <i class="fas fa-times me-1"></i>Cancel
                                                 </button>
                                                 <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">
                                             </div>
@@ -113,17 +113,17 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <div class="btn-group-sm" role="group">
+                                        <div class="btn-group-sm d-flex gap-1" role="group">
                                             <form method="post" style="display:inline;">
                                                 <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">
-                                                <button type="submit" name="action" value="edit" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-edit"></i>
+                                                <button type="submit" name="action" value="edit" class="btn btn-outline-primary btn-sm" title="Edit this alias and chat ID">
+                                                    <i class="fas fa-edit me-1"></i>Edit Alias
                                                 </button>
                                             </form>
-                                            <form method="post" style="display:inline;" onsubmit="return confirm('Delete this alias? This will not affect existing hunts.');">
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete the alias \'{{ alias.alias }}\'?\n\nThis will remove the alias from your list but won\'t affect existing hunts that use this chat ID.');">
                                                 <input type="hidden" name="delete_idx" value="{{ loop.index0 }}">
-                                                <button type="submit" name="action" value="delete" class="btn btn-outline-danger btn-sm">
-                                                    <i class="fas fa-trash"></i>
+                                                <button type="submit" name="action" value="delete" class="btn btn-outline-danger btn-sm" title="Delete this alias (won't affect existing hunts)">
+                                                    <i class="fas fa-trash me-1"></i>Delete Alias
                                                 </button>
                                             </form>
                                         </div>
@@ -223,6 +223,15 @@
 
 .btn-group-sm .btn {
     padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-group-sm.d-flex {
+    flex-wrap: wrap;
+}
+
+.btn-group-sm.d-flex .btn {
+    margin-bottom: 2px;
 }
 
 code {
