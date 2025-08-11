@@ -257,6 +257,10 @@ def chat_management():
 def debug_dashboard():
     """Main debug dashboard showing all products and debug links"""
     from datetime import datetime
+    from product_tracker.database import get_database_status
+    
+    # Get database status
+    db_status = get_database_status()
     
     # Count unique chat IDs
     all_chat_ids = set()
@@ -268,7 +272,23 @@ def debug_dashboard():
                          products=scheduled_products,
                          total_chat_ids=len(all_chat_ids),
                          current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         db_status=db_status,
                          active_page='debug')
+
+@app.route('/debug/database')
+def debug_database():
+    """Debug endpoint to check database connection status"""
+    from product_tracker.database import get_database_status
+    import json
+    
+    status = get_database_status()
+    
+    return f"""
+    <h2>🗄️ Database Connection Status</h2>
+    <pre>{json.dumps(status, indent=2)}</pre>
+    <br>
+    <a href="/debug">← Back to Debug Dashboard</a>
+    """
 
 @app.route('/debug/scheduler')
 def debug_scheduler():

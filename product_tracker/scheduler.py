@@ -26,31 +26,15 @@ def send_daily_tracking_summary():
 import uuid
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-import json
-import os
 
-SCHEDULED_FILE = 'scheduled_products.json'
-
-# Load scheduled products from file if exists
-def load_scheduled():
-    print(f"[load_scheduled] Called with no arguments")
-    if os.path.exists(SCHEDULED_FILE):
-        with open(SCHEDULED_FILE, 'r', encoding='utf-8') as f:
-            content = f.read().strip()
-            if not content:
-                print(f"[load_scheduled] Returning: [] (empty file)")
-                return []
-            result = json.loads(content)
-            print(f"[load_scheduled] Returning: {result}")
-            return result
-    print(f"[load_scheduled] Returning: [] (file not found)")
-    return []
-
-def save_scheduled(scheduled_products):
-    print(f"[save_scheduled] Called with: scheduled_products={scheduled_products}")
-    print(f"[save_scheduled] Returning: None")
-    with open(SCHEDULED_FILE, 'w', encoding='utf-8') as f:
-        json.dump(scheduled_products, f, indent=2)
+# Import database functions
+from product_tracker.database import (
+    load_scheduled, 
+    save_scheduled, 
+    add_scheduled_product, 
+    remove_scheduled_product,
+    get_database_status
+)
 
 scheduled_products = load_scheduled()
 
