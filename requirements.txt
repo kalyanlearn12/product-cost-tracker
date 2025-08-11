@@ -5,3 +5,4 @@ python-telegram-bot==20.7
 APScheduler==3.10.4
 selenium==4.15.2
 gunicorn==21.2.0
+python-dotenv==1.0.0

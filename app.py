@@ -6,6 +6,13 @@ import product_tracker.config as config
 import json
 import os
 
+# Load environment variables from .env file for local development
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not available in production
+
 # Initialize data files for Render deployment
 try:
     from init_data import ensure_data_files

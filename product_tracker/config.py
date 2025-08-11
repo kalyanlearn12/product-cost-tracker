@@ -1,10 +1,17 @@
 import os
 
+# Load environment variables from .env file for local development
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not available in production
+
 # Configuration for the Product Cost Tracker
 
 
 # Telegram Bot Token and Chat ID
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7675172119:AAFYBpcPJrvx3HItlJRSg769iUdsMNRe8G8')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', None)
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '249722033')
 
 # Load chat aliases from JSON file
