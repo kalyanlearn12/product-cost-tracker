@@ -36,23 +36,21 @@ class KeepAliveService:
     
     def _setup_production_monitoring(self):
         """Set up keep-alive monitoring for production"""
-        # Get app URL from Render environment variables
-        # Render provides RENDER_SERVICE_NAME or we can construct from common patterns
-        render_service_name = os.environ.get('RENDER_SERVICE_NAME')
+        # Get app URL from Render environment with multiple fallback strategies
+        # Method 1: Try RENDER_EXTERNAL_URL (most reliable on Render)
+        self.app_url = os.environ.get('RENDER_EXTERNAL_URL')
         
-        if render_service_name:
-            self.app_url = f"https://{render_service_name}.onrender.com"
-        else:
-            # Fallback: use common Render URL pattern
-            # You can set RENDER_EXTERNAL_URL manually in Render dashboard
-            external_url = os.environ.get('RENDER_EXTERNAL_URL')
-            if external_url:
-                self.app_url = external_url
-            else:
-                # Final fallback: construct from known service name
-                self.app_url = "https://product-cost-tracker.onrender.com"
+        if not self.app_url:
+            # Method 2: Try RENDER_SERVICE_NAME (may not be available)
+            render_service_name = os.environ.get('RENDER_SERVICE_NAME')
+            if render_service_name:
+                self.app_url = f"https://{render_service_name}.onrender.com"
         
-        logger.info(f"🌐 Keep-alive service URL: {self.app_url}")
+        if not self.app_url:
+            # Method 3: Hardcoded fallback for known deployment
+            self.app_url = "https://product-cost-tracker-b7xd.onrender.com"
+            
+        logger.info(f"Keep-alive service initialized with URL: {self.app_url}")
         
         # Start background scheduler for self-ping
         self.scheduler = BackgroundScheduler()
@@ -73,29 +71,18 @@ class KeepAliveService:
             replace_existing=True
         )
         
-        try:
-            self.scheduler.start()
-            logger.info(f"✅ Keep-alive service started for {self.app_url}")
-            
-            # Do an immediate test ping
-            self._self_ping()
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to start keep-alive service: {e}")
+        self.scheduler.start()
+        logger.info(f"✅ Keep-alive service started for {self.app_url}")
     
     def _self_ping(self):
         """Ping own application to keep it awake"""
         if not self.app_url:
-            logger.warning("⚠️ Keep-alive: No app URL configured, skipping ping")
             return
             
         try:
-            ping_url = f"{self.app_url}/keep-alive"
-            logger.info(f"🏓 Keep-alive: Pinging {ping_url}")
-            
             # Ping the keep-alive endpoint
             response = requests.get(
-                ping_url,
+                f"{self.app_url}/keep-alive",
                 timeout=30,
                 headers={'User-Agent': 'KeepAlive-Internal/1.0'}
             )

@@ -19,6 +19,8 @@ TELEGRAM_BOT_TOKEN=7675172119:AAFYBpcPJrvx3HItlJRSg769iUdsMNRe8G8
 ## For local, gets from .env file and used for security aspects
 SECRET_KEY=921bea01571763abc2afdcc4731718d95e780db60a5ae9e2ef655a921c256d03
 
+##  uris to open chat and debug pages
+ <!-- Admin: /chat | /debug -->
 
 
 ##  MongoDB Related (Free Tier)
