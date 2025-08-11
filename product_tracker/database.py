@@ -178,9 +178,15 @@ class ProductDatabase:
     def _save_to_json(self, products: List[Dict]) -> bool:
         """Save products to JSON file"""
         try:
+            # Remove MongoDB ObjectId from products for JSON serialization
+            json_safe_products = []
+            for product in products:
+                safe_product = {k: v for k, v in product.items() if k != '_id'}
+                json_safe_products.append(safe_product)
+            
             with open(self.fallback_file, 'w', encoding='utf-8') as f:
-                json.dump(products, f, indent=2, ensure_ascii=False)
-            logger.info(f"💾 Saved {len(products)} products to JSON file")
+                json.dump(json_safe_products, f, indent=2, ensure_ascii=False)
+            logger.info(f"💾 Saved {len(json_safe_products)} products to JSON file")
             return True
         except Exception as e:
             logger.error(f"❌ JSON save error: {e}")
