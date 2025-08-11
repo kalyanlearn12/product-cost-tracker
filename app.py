@@ -23,6 +23,14 @@ except Exception as e:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key_change_in_production')
 
+# Initialize Keep-Alive Service for Render
+try:
+    from product_tracker.keep_alive import keep_alive_service
+    if os.environ.get('ENVIRONMENT') == 'production':
+        print("🚀 Keep-alive service initialized for production")
+except Exception as e:
+    print(f"Warning: Keep-alive service failed to initialize: {e}")
+
 
 # --- New Multi-Page Navigation ---
 @app.route('/')
@@ -290,6 +298,77 @@ def debug_database():
     <a href="/debug">← Back to Debug Dashboard</a>
     """
 
+@app.route('/debug/keep-alive')
+def debug_keep_alive():
+    """Debug endpoint to check keep-alive service status"""
+    from product_tracker.keep_alive import get_keep_alive_status, get_external_monitoring_options
+    import json
+    
+    status = get_keep_alive_status()
+    external_options = get_external_monitoring_options()
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Keep-Alive Service Status</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="container mt-4">
+        <h2>🔄 Keep-Alive Service Status</h2>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>Current Status</h5>
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3">{json.dumps(status, indent=2)}</pre>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5>📊 External Monitoring Services (Recommended)</h5>
+            </div>
+            <div class="card-body">
+                <p>For better reliability, set up external monitoring services:</p>
+    """
+    
+    for service in external_options:
+        html += f"""
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>{service['name']}</strong> - {service['description']}
+                    </div>
+                    <div class="card-body">
+                        <p><a href="{service['setup_url']}" target="_blank" class="btn btn-primary btn-sm">Setup {service['name']}</a></p>
+                        <strong>Instructions:</strong>
+                        <ol>
+        """
+        for instruction in service['instructions']:
+            html += f"<li>{instruction}</li>"
+        html += """
+                        </ol>
+                    </div>
+                </div>
+        """
+    
+    html += """
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <strong>💡 Tip:</strong> Use the <code>/health</code> endpoint for external monitoring. 
+            It provides JSON response with application status.
+        </div>
+        
+        <a href="/debug" class="btn btn-secondary">← Back to Debug Dashboard</a>
+    </body>
+    </html>
+    """
+    
+    return html
+
 @app.route('/debug/scheduler')
 def debug_scheduler():
     """Debug endpoint to check scheduler status"""
@@ -467,6 +546,34 @@ def debug_trigger_all():
     
     return html
 
+# --- Keep-Alive System for Render ---
+@app.route('/health')
+def health_check():
+    """Simple health check endpoint for monitoring"""
+    from datetime import datetime
+    from product_tracker.database import get_database_status
+    
+    db_status = get_database_status()
+    
+    return {
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'database_connected': db_status['connected'],
+        'products_count': db_status['product_count'],
+        'environment': os.environ.get('ENVIRONMENT', 'development')
+    }
+
+@app.route('/keep-alive')
+def keep_alive():
+    """Keep-alive endpoint that can be pinged externally"""
+    from datetime import datetime
+    
+    return {
+        'status': 'alive',
+        'message': 'Application is running',
+        'timestamp': datetime.now().isoformat(),
+        'uptime_check': True
+    }
 
 
 if __name__ == '__main__':
