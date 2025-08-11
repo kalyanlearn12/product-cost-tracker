@@ -36,9 +36,21 @@ class KeepAliveService:
     
     def _setup_production_monitoring(self):
         """Set up keep-alive monitoring for production"""
-        # Get app URL from Render environment
-        render_service_name = os.environ.get('RENDER_SERVICE_NAME', 'product-cost-tracker')
-        self.app_url = f"https://{render_service_name}.onrender.com"
+        # Get app URL from Render environment with multiple fallback strategies
+        # Method 1: Try RENDER_EXTERNAL_URL (most reliable on Render)
+        self.app_url = os.environ.get('RENDER_EXTERNAL_URL')
+        
+        if not self.app_url:
+            # Method 2: Try RENDER_SERVICE_NAME (may not be available)
+            render_service_name = os.environ.get('RENDER_SERVICE_NAME')
+            if render_service_name:
+                self.app_url = f"https://{render_service_name}.onrender.com"
+        
+        if not self.app_url:
+            # Method 3: Hardcoded fallback for known deployment
+            self.app_url = "https://product-cost-tracker-b7xd.onrender.com"
+            
+        logger.info(f"Keep-alive service initialized with URL: {self.app_url}")
         
         # Start background scheduler for self-ping
         self.scheduler = BackgroundScheduler()
