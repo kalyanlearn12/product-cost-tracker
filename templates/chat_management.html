@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Chat Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-users me-2"></i>Chat Management
+                </h2>
+                <div class="badge bg-info fs-6">
+                    <i class="fas fa-hashtag me-1"></i>{{ chat_aliases|length }} Aliases
+                </div>
+            </div>
+
+            <!-- Add New Chat Alias -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add New Chat Alias</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="new_alias" class="form-label">Alias (Nickname)</label>
+                                <input type="text" class="form-control" id="new_alias" name="new_alias" 
+                                       placeholder="e.g., John, Mom, Work" required>
+                                <div class="form-text">Enter a friendly name to identify this contact</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="new_chat_id" class="form-label">Chat ID</label>
+                                <input type="text" class="form-control" id="new_chat_id" name="new_chat_id" 
+                                       placeholder="e.g., 123456789" required>
+                                <div class="form-text">Enter the Telegram chat ID number</div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" name="action" value="add" class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Add Alias
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Current Chat Aliases -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Current Chat Aliases</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if chat_aliases %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Alias (Nickname)</th>
+                                    <th>Chat ID</th>
+                                    <th style="width: 120px;">Used In</th>
+                                    <th style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alias in chat_aliases %}
+                                {% if edit_idx is defined and edit_idx == loop.index0 %}
+                                <!-- Edit Form Row -->
+                                <form method="post" style="margin:0;">
+                                    <tr class="table-warning">
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   name="edit_alias" value="{{ alias.alias }}" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   name="edit_chat_id" value="{{ alias.chat_id }}" required>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ usage_count[alias.chat_id] or 0 }} hunts</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group-sm" role="group">
+                                                <button type="submit" name="action" value="save" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-save"></i>
+                                                </button>
+                                                <button type="submit" name="action" value="cancel" class="btn btn-secondary btn-sm">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </form>
+                                {% else %}
+                                <!-- Display Row -->
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong>{{ alias.alias }}</strong>
+                                    </td>
+                                    <td>
+                                        <code class="text-muted">{{ alias.chat_id }}</code>
+                                    </td>
+                                    <td>
+                                        {% set count = usage_count[alias.chat_id] or 0 %}
+                                        {% if count > 0 %}
+                                            <span class="badge bg-success">{{ count }} hunts</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Unused</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-sm" role="group">
+                                            <form method="post" style="display:inline;">
+                                                <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">
+                                                <button type="submit" name="action" value="edit" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </form>
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('Delete this alias? This will not affect existing hunts.');">
+                                                <input type="hidden" name="delete_idx" value="{{ loop.index0 }}">
+                                                <button type="submit" name="action" value="delete" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users-slash text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted mt-2">No Chat Aliases</h5>
+                        <p class="text-muted">Add your first chat alias above to get started.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Usage Instructions -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>How to Get Chat ID</h6>
+                        </div>
+                        <div class="card-body">
+                            <ol class="mb-0">
+                                <li>Start a chat with <code>@userinfobot</code> on Telegram</li>
+                                <li>Send any message to the bot</li>
+                                <li>The bot will reply with your Chat ID</li>
+                                <li>Copy the number and paste it here</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Usage Tips</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li><strong>Aliases</strong> are nicknames for easy identification</li>
+                                <li><strong>Chat IDs</strong> are used to send Telegram notifications</li>
+                                <li>You can <strong>edit existing hunts</strong> to use new aliases</li>
+                                <li><strong>Deleting</strong> an alias won't affect existing hunts</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="/tracking" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Hunts
+                                </a>
+                                <a href="/form" class="btn btn-outline-success">
+                                    <i class="fas fa-plus me-2"></i>Add New Hunt
+                                </a>
+                                <a href="/debug" class="btn btn-outline-info">
+                                    <i class="fas fa-bug me-2"></i>Debug Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+    border-radius: 8px;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+code {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
+.form-text {
+    font-size: 0.8rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

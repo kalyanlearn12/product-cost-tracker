@@ -118,6 +118,128 @@ def tracking_table():
     import product_tracker.config as config
     return render_template('tracking.html', scheduled_products=scheduled_products, active_page='table', edit_idx=edit_idx, config=config)
 
+@app.route('/chat', methods=['GET', 'POST'])
+def chat_management():
+    """Manage chat aliases and IDs"""
+    import json
+    import os
+    from product_tracker.tracker import scheduled_products
+    
+    # Load current chat aliases
+    aliases_file = os.path.join(os.path.dirname(__file__), 'product_tracker', 'chat_aliases.json')
+    try:
+        with open(aliases_file, 'r') as f:
+            chat_aliases = json.load(f)
+    except:
+        chat_aliases = []
+    
+    # Calculate usage count for each chat ID
+    usage_count = {}
+    for product in scheduled_products:
+        chat_ids = product.get('telegram_chat_ids', [])
+        if isinstance(chat_ids, list):
+            for chat_id in chat_ids:
+                usage_count[chat_id] = usage_count.get(chat_id, 0) + 1
+        elif product.get('telegram_chat_id'):  # Legacy single chat_id
+            chat_id = product['telegram_chat_id']
+            usage_count[chat_id] = usage_count.get(chat_id, 0) + 1
+    
+    edit_idx = None
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add':
+            # Add new alias
+            new_alias = request.form.get('new_alias', '').strip()
+            new_chat_id = request.form.get('new_chat_id', '').strip()
+            
+            if new_alias and new_chat_id:
+                # Check if alias or chat_id already exists
+                existing_alias = any(a['alias'].lower() == new_alias.lower() for a in chat_aliases)
+                existing_chat_id = any(a['chat_id'] == new_chat_id for a in chat_aliases)
+                
+                if existing_alias:
+                    flash(f'Alias "{new_alias}" already exists!', 'danger')
+                elif existing_chat_id:
+                    flash(f'Chat ID "{new_chat_id}" already exists!', 'danger')
+                else:
+                    chat_aliases.append({'alias': new_alias, 'chat_id': new_chat_id})
+                    # Save to file
+                    with open(aliases_file, 'w') as f:
+                        json.dump(chat_aliases, f, indent=2)
+                    flash(f'Added new alias "{new_alias}" successfully!', 'success')
+                    
+                    # Reload config to pick up new aliases
+                    import product_tracker.config as config
+                    config.load_chat_aliases()
+            else:
+                flash('Both alias and chat ID are required!', 'danger')
+                
+        elif action == 'edit':
+            edit_idx = int(request.form.get('edit_idx', -1))
+            
+        elif action == 'save':
+            # Save edited alias
+            edit_idx_val = int(request.form.get('edit_idx', -1))
+            if 0 <= edit_idx_val < len(chat_aliases):
+                new_alias = request.form.get('edit_alias', '').strip()
+                new_chat_id = request.form.get('edit_chat_id', '').strip()
+                
+                if new_alias and new_chat_id:
+                    # Check for duplicates (excluding current item)
+                    existing_alias = any(i != edit_idx_val and a['alias'].lower() == new_alias.lower() 
+                                       for i, a in enumerate(chat_aliases))
+                    existing_chat_id = any(i != edit_idx_val and a['chat_id'] == new_chat_id 
+                                         for i, a in enumerate(chat_aliases))
+                    
+                    if existing_alias:
+                        flash(f'Alias "{new_alias}" already exists!', 'danger')
+                        edit_idx = edit_idx_val
+                    elif existing_chat_id:
+                        flash(f'Chat ID "{new_chat_id}" already exists!', 'danger')
+                        edit_idx = edit_idx_val
+                    else:
+                        old_alias = chat_aliases[edit_idx_val]['alias']
+                        chat_aliases[edit_idx_val] = {'alias': new_alias, 'chat_id': new_chat_id}
+                        
+                        # Save to file
+                        with open(aliases_file, 'w') as f:
+                            json.dump(chat_aliases, f, indent=2)
+                        flash(f'Updated alias "{old_alias}" to "{new_alias}" successfully!', 'success')
+                        
+                        # Reload config
+                        import product_tracker.config as config
+                        config.load_chat_aliases()
+                else:
+                    flash('Both alias and chat ID are required!', 'danger')
+                    edit_idx = edit_idx_val
+                    
+        elif action == 'cancel':
+            pass  # Just clear edit mode
+            
+        elif action == 'delete':
+            # Delete alias
+            delete_idx = int(request.form.get('delete_idx', -1))
+            if 0 <= delete_idx < len(chat_aliases):
+                deleted_alias = chat_aliases[delete_idx]['alias']
+                del chat_aliases[delete_idx]
+                
+                # Save to file
+                with open(aliases_file, 'w') as f:
+                    json.dump(chat_aliases, f, indent=2)
+                flash(f'Deleted alias "{deleted_alias}" successfully!', 'success')
+                
+                # Reload config
+                import product_tracker.config as config
+                config.load_chat_aliases()
+    
+    return render_template('chat_management.html', 
+                         chat_aliases=chat_aliases,
+                         usage_count=usage_count,
+                         edit_idx=edit_idx,
+                         active_page='chat')
+
 @app.route('/debug')
 def debug_dashboard():
     """Main debug dashboard showing all products and debug links"""

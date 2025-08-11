@@ -200,6 +200,11 @@
           <a class="nav-link {% if active_page == 'table' %}active{% endif %}" href="/tracking">Being Hunted</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link {% if active_page == 'chat' %}active{% endif %}" href="/chat" title="Chat Management">
+            <i class="fas fa-users me-1"></i>Chats
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link {% if active_page == 'debug' %}active{% endif %}" href="/debug" title="Debug Dashboard">
             <i class="fas fa-bug me-1"></i>Debug
           </a>
@@ -208,6 +213,21 @@
     </div>
   </div>
 </nav>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <div class="container">
   {% block content %}{% endblock %}
 </div>
