@@ -6,9 +6,15 @@ import product_tracker.config as config
 import json
 import os
 
+# Initialize data files for Render deployment
+try:
+    from init_data import ensure_data_files
+    ensure_data_files()
+except Exception as e:
+    print(f"Warning: Could not initialize data files: {e}")
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key_change_in_production')
 
 
 # --- New Multi-Page Navigation ---
@@ -437,4 +443,6 @@ def debug_trigger_all():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

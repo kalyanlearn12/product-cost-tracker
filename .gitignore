@@ -1,16 +1,31 @@
-product_tracker/__pycache__/tracker.cpython-312.pyc
-tests/__pycache__/test_tracker.cpython-312.pyc
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Local data files (will be recreated on Render)
 scheduled_products.json
 
-__pycache__/config.cpython-312.pyc
-__pycache__/test_tracker.cpython-312.pyc
-__pycache__/tracker.cpython-312.pyc
-product_tracker/__pycache__/__init__.cpython-312.pyc
-product_tracker/__pycache__/config.cpython-312.pyc
-product_tracker/__pycache__/notifier.cpython-312.pyc
-product_tracker/__pycache__/scheduler.cpython-312.pyc
-chromedriver-win64/chromedriver.exe
-chromedriver-win64/LICENSE.chromedriver
-chromedriver-win64/THIRD_PARTY_NOTICES.chromedriver
-product_tracker/__pycache__/amazon.cpython-312.pyc
-product_tracker/__pycache__/myntra.cpython-312.pyc
+# Chrome Driver (Render provides system Chrome)
+chromedriver-win64/
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Test files
+test_*.py
