@@ -26,7 +26,7 @@ This guide explains how to set up MongoDB Atlas for cloud deployment while keepi
 2. Click "Add New Database User"
 3. **Authentication Method**: Password
 4. **Username**: `product_tracker_user`
-5. **Password**: Generate secure password (save it!)
+5. **Password**: Generate secure password (save it!)  5Sageywemmbfa0ms
 6. **Database User Privileges**: "Read and write to any database"
 7. Click "Add User"
 
@@ -45,6 +45,9 @@ This guide explains how to set up MongoDB Atlas for cloud deployment while keepi
    ```
    mongodb+srv://product_tracker_user:<password>@product-tracker-cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority
    ```
+
+mongodb+srv://product_tracker_user:<db_password>@product-tracker-cluster.aenuves.mongodb.net/?retryWrites=true&w=majority&appName=product-tracker-cluster
+
 
 ## 🔧 Environment Configuration
 
