@@ -5,6 +5,14 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', None)
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '249722033')
 
 
+
+bit.ly/kal-venator - short url for this app
+full length render url is https://product-cost-tracker.onrender.com/
+
+all are on kalyanlearn12@gmail.com
+
+
+
 ## For local, gets from .env file. this is to send notifications to telegram
 TELEGRAM_BOT_TOKEN=7675172119:AAFYBpcPJrvx3HItlJRSg769iUdsMNRe8G8
 
