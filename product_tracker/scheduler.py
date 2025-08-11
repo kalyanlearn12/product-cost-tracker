@@ -104,17 +104,50 @@ def _add_job_for_product(idx, item):
             hour, minute = 0, 0
     
     try:
-        # Calculate all the hours when the job should run based on start_time and interval
-        run_hours = []
-        current_hour = hour
+        # Check if this is a night-mode job (runs only during specified night hours)
+        night_mode = item.get('night_mode', False)
+        night_end = item.get('night_end', '09:00')
         
-        # Generate all run hours for a 24-hour period
-        while len(run_hours) < 24 // interval:
-            run_hours.append(current_hour % 24)
-            current_hour += interval
-            if current_hour >= 24 and current_hour % 24 in run_hours:
-                break
-                
+        if night_mode:
+            # Parse night end time
+            try:
+                night_end_hour, night_end_minute = map(int, night_end.split(':'))
+            except:
+                night_end_hour, night_end_minute = 9, 0
+            
+            # Calculate night hours: from start_time to night_end (crossing midnight)
+            run_hours = []
+            current_hour = hour
+            
+            # Generate hours from start_time until midnight
+            while current_hour < 24:
+                run_hours.append(current_hour)
+                current_hour += interval
+            
+            # Generate hours from midnight until night_end
+            current_hour = 0
+            while current_hour <= night_end_hour:
+                if current_hour not in run_hours:  # Avoid duplicates
+                    run_hours.append(current_hour)
+                current_hour += interval
+                if current_hour > night_end_hour:
+                    break
+            
+            # Sort the hours for better readability
+            run_hours.sort()
+            print(f"[_add_job_for_product] Night mode - Run hours: {run_hours} (from {start_time} to {night_end})")
+        else:
+            # Calculate all the hours when the job should run based on start_time and interval (regular mode)
+            run_hours = []
+            current_hour = hour
+            
+            # Generate all run hours for a 24-hour period
+            while len(run_hours) < 24 // interval:
+                run_hours.append(current_hour % 24)
+                current_hour += interval
+                if current_hour >= 24 and current_hour % 24 in run_hours:
+                    break
+        
         print(f"[_add_job_for_product] Calculated run hours: {run_hours}")
         
         # Use cron scheduling to run at specific hours

@@ -192,6 +192,25 @@
   <div class="col-lg-10">
     <div class="scheduled-card">
       <div class="venator-heading">Being Hunted</div>
+      
+      <!-- Night Mode Explanation -->
+      <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Scheduling Modes Explained:</strong>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <span class="badge bg-primary me-2"><i class="fas fa-moon me-1"></i>Night Only</span>
+            <span class="text-sm">Runs only during specified night hours (e.g., 8 PM to 9 AM)</span>
+          </div>
+          <div class="col-md-6">
+            <span class="badge bg-secondary me-2"><i class="fas fa-sun me-1"></i>24/7</span>
+            <span class="text-sm">Runs continuously every X hours around the clock</span>
+          </div>
+        </div>
+      </div>
+      
       {% if scheduled_products %}
       <div class="table-responsive">
         <table class="venator-table">
@@ -202,6 +221,7 @@
               <th>Telegram Recipient(s)</th>
               <th>Frequency (hours)</th>
               <th>Start Time</th>
+              <th style="min-width:100px;">Night Mode</th>
               <th style="text-align:center; min-width:70px;">Edit</th>
               <th style="text-align:center; min-width:80px;">Delete</th>
             </tr>
@@ -225,6 +245,18 @@
                   </select>
                 </td>
                 <td><input type="time" class="form-control" name="edit_start_time" value="{{ item.start_time or '00:00' }}"></td>
+                <td>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="edit_night_mode_{{ loop.index0 }}" name="edit_night_mode" value="true" 
+                           {% if item.get('night_mode', False) %}checked{% endif %}>
+                    <label class="form-check-label text-sm" for="edit_night_mode_{{ loop.index0 }}">
+                      Night Only
+                    </label>
+                  </div>
+                  {% if item.get('night_mode', False) %}
+                  <small class="text-muted">Until {{ item.get('night_end', '09:00') }}</small>
+                  {% endif %}
+                </td>
                 <td style="text-align:center;">
                   <button type="submit" class="btn btn-primary btn-sm px-3" name="save_idx" value="{{ loop.index0 }}">Save</button>
                   <button type="submit" class="btn btn-secondary btn-sm px-3 ms-1" name="cancel_edit" value="1">Cancel</button>
@@ -249,6 +281,18 @@
               </td>
               <td>{{ item.schedule_interval }}</td>
               <td>{% if item.start_time %}{{ item.start_time }}{% else %}-{% endif %}</td>
+              <td>
+                {% if item.get('night_mode', False) %}
+                  <span class="badge bg-primary">
+                    <i class="fas fa-moon me-1"></i>Night Only
+                  </span>
+                  <br><small class="text-muted">Until {{ item.get('night_end', '09:00') }}</small>
+                {% else %}
+                  <span class="badge bg-secondary">
+                    <i class="fas fa-sun me-1"></i>24/7
+                  </span>
+                {% endif %}
+              </td>
               <td style="text-align:center;">
                 <form method="post" style="margin:0;display:inline;">
                   <input type="hidden" name="edit_idx" value="{{ loop.index0 }}">

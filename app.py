@@ -93,11 +93,22 @@ def tracking_table():
             chat_ids = [config.ALIAS_TO_ID.get(alias, alias) for alias in aliases]
             schedule_interval = int(request.form['edit_schedule_interval'])
             start_time = request.form.get('edit_start_time', '00:00')
+            night_mode = request.form.get('edit_night_mode') == 'true'
+            
             item = scheduled_products[idx]
             item['target_price'] = target_price
             item['telegram_chat_ids'] = chat_ids
             item['schedule_interval'] = schedule_interval
             item['start_time'] = start_time
+            
+            # Handle night mode settings
+            if night_mode:
+                item['night_mode'] = True
+                item['night_end'] = '09:00'  # Default night end time
+            else:
+                # Remove night mode settings if disabled
+                item.pop('night_mode', None)
+                item.pop('night_end', None)
             save_scheduled(scheduled_products)
         elif 'delete_idx' in request.form:
             idx = int(request.form['delete_idx'])
