@@ -5,6 +5,11 @@ from product_tracker.tracker import track_product
 import product_tracker.config as config
 import json
 import os
+import pytz
+from datetime import datetime
+
+# Set timezone to IST
+IST = pytz.timezone('Asia/Kolkata')
 
 # Load environment variables from .env file for local development
 try:
@@ -279,7 +284,7 @@ def debug_dashboard():
     return render_template('debug.html', 
                          products=scheduled_products,
                          total_chat_ids=len(all_chat_ids),
-                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         current_time=datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S %Z'),
                          db_status=db_status,
                          active_page='debug')
 
@@ -550,14 +555,15 @@ def debug_trigger_all():
 @app.route('/health')
 def health_check():
     """Simple health check endpoint for monitoring"""
-    from datetime import datetime
     from product_tracker.database import get_database_status
     
     db_status = get_database_status()
+    current_time = datetime.now(IST)  # Use IST timezone
     
     return {
         'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
+        'timestamp': current_time.isoformat(),
+        'timestamp_ist': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
         'database_connected': db_status['connected'],
         'products_count': db_status['product_count'],
         'environment': os.environ.get('ENVIRONMENT', 'development')
@@ -566,12 +572,13 @@ def health_check():
 @app.route('/keep-alive')
 def keep_alive():
     """Keep-alive endpoint that can be pinged externally"""
-    from datetime import datetime
+    current_time = datetime.now(IST)  # Use IST timezone
     
     return {
         'status': 'alive',
         'message': 'Application is running',
-        'timestamp': datetime.now().isoformat(),
+        'timestamp': current_time.isoformat(),
+        'timestamp_ist': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
         'uptime_check': True
     }
 

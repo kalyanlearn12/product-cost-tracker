@@ -12,9 +12,13 @@ import os
 import time
 import requests
 import threading
+import pytz
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
+
+# Set up timezone
+IST = pytz.timezone('Asia/Kolkata')
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -88,9 +92,9 @@ class KeepAliveService:
             )
             
             if response.status_code == 200:
-                self.last_ping = datetime.now()
+                self.last_ping = datetime.now(IST)  # Use IST timezone
                 self.failed_pings = 0
-                logger.info(f"✅ Keep-alive ping successful at {self.last_ping}")
+                logger.info(f"✅ Keep-alive ping successful at {self.last_ping.strftime('%Y-%m-%d %H:%M:%S %Z')}")
             else:
                 self._handle_ping_failure(f"HTTP {response.status_code}")
                 

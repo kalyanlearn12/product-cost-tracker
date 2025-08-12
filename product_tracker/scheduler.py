@@ -24,8 +24,14 @@ def send_daily_tracking_summary():
     for chat_id in ['249722033', '258922383']:
         send_telegram_message(msg, chat_id, parse_mode='HTML')
 import uuid
+import pytz
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
 import atexit
+
+# Set timezone to IST
+IST = pytz.timezone('Asia/Kolkata')
 
 # Import database functions
 from product_tracker.database import (
@@ -304,7 +310,11 @@ def start_scheduler():
         'misfire_grace_time': 60  # Grace period for missed jobs (60 seconds)
     }
     
-    _scheduler = BackgroundScheduler(executors=executors, job_defaults=job_defaults)
+    _scheduler = BackgroundScheduler(
+        executors=executors, 
+        job_defaults=job_defaults,
+        timezone=IST  # Set timezone to IST
+    )
     _scheduler.start()
     
     # Schedule daily summary at 8am
